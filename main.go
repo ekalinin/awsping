@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	Version   string = "0.1.0"
-	GitHub    string = "https://github.com/ekalinin/awsping"
-	UserAgent string = fmt.Sprintf("AwsPing/%s (+%s)", Version, GitHub)
+	version   = "0.1.0"
+	github    = "https://github.com/ekalinin/awsping"
+	useragent = fmt.Sprintf("AwsPing/%s (+%s)", version, github)
 )
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -24,6 +24,7 @@ func mkRandoString(n int) string {
 	return string(b)
 }
 
+// AWSRegion description of the AWS EC2 region
 type AWSRegion struct {
 	Name    string
 	Code    string
@@ -31,13 +32,14 @@ type AWSRegion struct {
 	Error   error
 }
 
+// CheckLatency fills internal field Latency
 func (r *AWSRegion) CheckLatency(wg *sync.WaitGroup) {
 	url := fmt.Sprintf("http://dynamodb.%s.amazonaws.com/ping?x=%s",
 		r.Code, mkRandoString(13))
 	client := &http.Client{}
 
 	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Set("User-Agent", UserAgent)
+	req.Header.Set("User-Agent", useragent)
 
 	start := time.Now()
 	resp, err := client.Do(req)
@@ -73,10 +75,11 @@ func main() {
 
 	wg.Wait()
 
-	outFmt := "|%5v|%30s|%20s|%20v|\n"
+	outFmt := "|%5v|%-30s|%20s|%20v|\n"
 	fmt.Printf(outFmt, "", "Region", "Latency", "Error")
 	for i, r := range regions {
-		fmt.Printf(outFmt, i, r.Name, r.Latency, r.Error)
+		ms := fmt.Sprintf("%.2f ms", float64(r.Latency.Nanoseconds())/1000/1000)
+		fmt.Printf(outFmt, i, r.Name, ms, r.Error)
 	}
 }
 
