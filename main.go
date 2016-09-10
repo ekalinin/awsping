@@ -93,11 +93,11 @@ func main() {
 
 	sort.Sort(regions)
 
-	outFmt := "|%5v|%-30s|%20s|%20v|\n"
-	fmt.Printf(outFmt, "", "Region", "Latency", "Error")
+	outFmt := "%5v %-30s %20s\n"
+	fmt.Printf(outFmt, "", "Region", "Latency")
 	for i, r := range regions {
 		ms := fmt.Sprintf("%.2f ms", float64(r.Latency.Nanoseconds())/1000/1000)
-		fmt.Printf(outFmt, i, r.Name, ms, r.Error)
+		fmt.Printf(outFmt, i, r.Name, ms)
 	}
 }
 
