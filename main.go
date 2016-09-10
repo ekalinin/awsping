@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"sort"
 	"sync"
 	"time"
 )
@@ -51,8 +52,23 @@ func (r *AWSRegion) CheckLatency(wg *sync.WaitGroup) {
 	wg.Done()
 }
 
+// AWSRegions slice of the AWSRegion
+type AWSRegions []AWSRegion
+
+func (rs AWSRegions) Len() int {
+	return len(rs)
+}
+
+func (rs AWSRegions) Less(i, j int) bool {
+	return rs[i].Latency < rs[j].Latency
+}
+
+func (rs AWSRegions) Swap(i, j int) {
+	rs[i], rs[j] = rs[j], rs[i]
+}
+
 func main() {
-	regions := []AWSRegion{
+	regions := AWSRegions{
 		{Name: "US-East (Virginia)", Code: "us-east-1"},
 		{Name: "US-West (California)", Code: "us-west-1"},
 		{Name: "US-West (Oregon)", Code: "us-west-2"},
@@ -74,6 +90,8 @@ func main() {
 	}
 
 	wg.Wait()
+
+	sort.Sort(regions)
 
 	outFmt := "|%5v|%-30s|%20s|%20v|\n"
 	fmt.Printf(outFmt, "", "Region", "Latency", "Error")
