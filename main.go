@@ -67,7 +67,8 @@ func (rs AWSRegions) Swap(i, j int) {
 	rs[i], rs[j] = rs[j], rs[i]
 }
 
-func main() {
+// CalcLatency returns list of aws regions sorted by Latency
+func CalcLatency() *AWSRegions {
 	regions := AWSRegions{
 		{Name: "US-East (Virginia)", Code: "us-east-1"},
 		{Name: "US-West (California)", Code: "us-west-1"},
@@ -92,6 +93,12 @@ func main() {
 	wg.Wait()
 
 	sort.Sort(regions)
+	return &regions
+}
+
+func main() {
+
+	regions := *CalcLatency()
 
 	outFmt := "%5v %-30s %20s\n"
 	fmt.Printf(outFmt, "", "Region", "Latency")
