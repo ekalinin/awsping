@@ -15,6 +15,11 @@ run:
 test:
 	@go test -v
 
+release:
+	git tag `grep "version" main.go | grep -o -E '[0-9]\.[0-9]\.[0-9]{1,2}'`
+	git push --tags origin master
+
+
 #
 # For virtual environment create with
 # https://github.com/ekalinin/envirius
