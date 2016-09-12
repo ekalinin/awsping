@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -15,6 +16,10 @@ var (
 	useragent = fmt.Sprintf("AwsPing/%s (+%s)", version, github)
 )
 
+var (
+	repeats = flag.Int("repeats", 1, "Number of repeats")
+)
+
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 func mkRandoString(n int) string {
@@ -27,10 +32,10 @@ func mkRandoString(n int) string {
 
 // AWSRegion description of the AWS EC2 region
 type AWSRegion struct {
-	Name    string
-	Code    string
-	Latency time.Duration
-	Error   error
+	Name      string
+	Code      string
+	Latencies []time.Duration
+	Error     error
 }
 
 // CheckLatency fills internal field Latency
@@ -44,12 +49,21 @@ func (r *AWSRegion) CheckLatency(wg *sync.WaitGroup) {
 
 	start := time.Now()
 	resp, err := client.Do(req)
-	r.Latency = time.Since(start)
+	r.Latencies = append(r.Latencies, time.Since(start))
 
 	r.Error = err
 	resp.Body.Close()
 
 	wg.Done()
+}
+
+// GetLatency returns Latency in ms
+func (r *AWSRegion) GetLatency() float64 {
+	sum := float64(0)
+	for _, l := range r.Latencies {
+		sum += float64(l.Nanoseconds()) / 1000 / 1000
+	}
+	return sum / float64(len(r.Latencies))
 }
 
 // AWSRegions slice of the AWSRegion
@@ -60,7 +74,7 @@ func (rs AWSRegions) Len() int {
 }
 
 func (rs AWSRegions) Less(i, j int) bool {
-	return rs[i].Latency < rs[j].Latency
+	return rs[i].GetLatency() < rs[j].GetLatency()
 }
 
 func (rs AWSRegions) Swap(i, j int) {
@@ -68,7 +82,7 @@ func (rs AWSRegions) Swap(i, j int) {
 }
 
 // CalcLatency returns list of aws regions sorted by Latency
-func CalcLatency() *AWSRegions {
+func CalcLatency(repeats int) *AWSRegions {
 	regions := AWSRegions{
 		{Name: "US-East (Virginia)", Code: "us-east-1"},
 		{Name: "US-West (California)", Code: "us-west-1"},
@@ -84,13 +98,17 @@ func CalcLatency() *AWSRegions {
 		//{Name: "China (Beijing)", Code: "cn-north-1"},
 	}
 	var wg sync.WaitGroup
-	wg.Add(len(regions))
 
-	for i := range regions {
-		go regions[i].CheckLatency(&wg)
+	for n := 1; n <= repeats; n++ {
+
+		wg.Add(len(regions))
+
+		for i := range regions {
+			go regions[i].CheckLatency(&wg)
+		}
+
+		wg.Wait()
 	}
-
-	wg.Wait()
 
 	sort.Sort(regions)
 	return &regions
@@ -98,12 +116,14 @@ func CalcLatency() *AWSRegions {
 
 func main() {
 
-	regions := *CalcLatency()
+	flag.Parse()
+
+	regions := *CalcLatency(*repeats)
 
 	outFmt := "%5v %-30s %20s\n"
 	fmt.Printf(outFmt, "", "Region", "Latency")
 	for i, r := range regions {
-		ms := fmt.Sprintf("%.2f ms", float64(r.Latency.Nanoseconds())/1000/1000)
+		ms := fmt.Sprintf("%.2f ms", r.GetLatency())
 		fmt.Printf(outFmt, i, r.Name, ms)
 	}
 }
