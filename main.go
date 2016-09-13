@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
+	"net"
 	"net/http"
 	"sort"
 	"sync"
@@ -38,8 +40,9 @@ type AWSRegion struct {
 	Error     error
 }
 
-// CheckLatency fills internal field Latency
-func (r *AWSRegion) CheckLatency(wg *sync.WaitGroup) {
+// CheckLatencyHTTP Test Latency via HTTP
+func (r *AWSRegion) CheckLatencyHTTP(wg *sync.WaitGroup) {
+	defer wg.Done()
 	url := fmt.Sprintf("http://dynamodb.%s.amazonaws.com/ping?x=%s",
 		r.Code, mkRandoString(13))
 	client := &http.Client{}
@@ -50,11 +53,25 @@ func (r *AWSRegion) CheckLatency(wg *sync.WaitGroup) {
 	start := time.Now()
 	resp, err := client.Do(req)
 	r.Latencies = append(r.Latencies, time.Since(start))
+	defer resp.Body.Close()
 
 	r.Error = err
-	resp.Body.Close()
+}
 
-	wg.Done()
+// CheckLatencyTCP Test Latency via TCP
+func (r *AWSRegion) CheckLatencyTCP(wg *sync.WaitGroup) {
+	defer wg.Done()
+	tcpAddr, err := net.ResolveTCPAddr("tcp4",
+		fmt.Sprintf("dynamodb.%s.amazonaws.com:80", r.Code))
+
+	start := time.Now()
+	conn, _ := net.DialTCP("tcp", nil, tcpAddr)
+	r.Latencies = append(r.Latencies, time.Since(start))
+	defer conn.Close()
+	_, _ = conn.Write([]byte("HEAD / HTTP/1.0\r\n\r\n"))
+	_, _ = ioutil.ReadAll(conn)
+
+	r.Error = err
 }
 
 // GetLatency returns Latency in ms
@@ -104,7 +121,7 @@ func CalcLatency(repeats int) *AWSRegions {
 		wg.Add(len(regions))
 
 		for i := range regions {
-			go regions[i].CheckLatency(&wg)
+			go regions[i].CheckLatencyTCP(&wg)
 		}
 
 		wg.Wait()
