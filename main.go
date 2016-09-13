@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net"
 	"net/http"
+	"os"
 	"sort"
 	"sync"
 	"time"
@@ -21,6 +22,7 @@ var (
 var (
 	repeats = flag.Int("repeats", 1, "Number of repeats")
 	useHTTP = flag.Bool("http", false, "Use http transport (default is tcp)")
+	showVer = flag.Bool("v", false, "Show version")
 )
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -140,6 +142,11 @@ func CalcLatency(repeats int, useHTTP bool) *AWSRegions {
 func main() {
 
 	flag.Parse()
+
+	if *showVer {
+		fmt.Println(version)
+		os.Exit(0)
+	}
 
 	regions := *CalcLatency(*repeats, *useHTTP)
 
