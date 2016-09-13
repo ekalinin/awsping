@@ -20,6 +20,7 @@ var (
 
 var (
 	repeats = flag.Int("repeats", 1, "Number of repeats")
+	useHTTP = flag.Bool("http", false, "Use http transport (default is tcp)")
 )
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -99,7 +100,7 @@ func (rs AWSRegions) Swap(i, j int) {
 }
 
 // CalcLatency returns list of aws regions sorted by Latency
-func CalcLatency(repeats int) *AWSRegions {
+func CalcLatency(repeats int, useHTTP bool) *AWSRegions {
 	regions := AWSRegions{
 		{Name: "US-East (Virginia)", Code: "us-east-1"},
 		{Name: "US-West (California)", Code: "us-west-1"},
@@ -121,7 +122,12 @@ func CalcLatency(repeats int) *AWSRegions {
 		wg.Add(len(regions))
 
 		for i := range regions {
-			go regions[i].CheckLatencyTCP(&wg)
+			if useHTTP {
+				go regions[i].CheckLatencyHTTP(&wg)
+			} else {
+				go regions[i].CheckLatencyTCP(&wg)
+			}
+
 		}
 
 		wg.Wait()
@@ -135,7 +141,7 @@ func main() {
 
 	flag.Parse()
 
-	regions := *CalcLatency(*repeats)
+	regions := *CalcLatency(*repeats, *useHTTP)
 
 	outFmt := "%5v %-30s %20s\n"
 	fmt.Printf(outFmt, "", "Region", "Latency")
