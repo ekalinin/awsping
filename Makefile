@@ -2,6 +2,10 @@ NAME=awsping
 EXEC=${NAME}
 GOVER=1.7.1
 ENVNAME=${NAME}${GOVER}
+BUILD_DIR=build
+BUILD_OS="windows darwin freebsd linux"
+BUILD_ARCH="amd64 386"
+BUILD_DIR=build
 
 build: deps
 	go build -o ${EXEC} main.go
@@ -18,6 +22,23 @@ test:
 release:
 	git tag `grep "version" main.go | grep -o -E '[0-9]\.[0-9]\.[0-9]{1,2}'`
 	git push --tags origin master
+
+clean:
+	@rm -f ${EXEC}
+	@rm -f ${BUILD_DIR}/*
+	@go clean
+
+buildall: clean
+	@mkdir -p ${BUILD_DIR}
+	@for os in "${BUILD_OS}" ; do \
+		for arch in "${BUILD_ARCH}" ; do \
+			echo " * build $$os for $$arch"; \
+			GOOS=$$os GOARCH=$$arch go build -ldflags "-s" -o ${BUILD_DIR}/${EXEC}; \
+			cd ${BUILD_DIR}; \
+			tar czf ${EXEC}.$$os.$$arch.tgz ${EXEC}; \
+			cd - ; \
+		done done
+	@rm ${BUILD_DIR}/${EXEC}
 
 
 #
