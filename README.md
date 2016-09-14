@@ -57,7 +57,17 @@ Console tool to check the latency to each AWS region
    10 Asia Pacific (Singapore)                  387.18 ms
 ``` 
 
-# Build
+# Get binary file
+
+```bash
+$ wget https://github.com/ekalinin/awsping/releases/download/0.3.0/awsping.linux.amd64.tgz
+$ tar xzvf awsping.linux.amd64.tgz
+$ chmod +x awsping
+$ $ ./awsping -v
+0.3.0
+```
+
+# Build from sources
 
 ```bash
 ➥ make build
