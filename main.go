@@ -22,6 +22,7 @@ var (
 	repeats = flag.Int("repeats", 1, "Number of repeats")
 	useHTTP = flag.Bool("http", false, "Use http transport (default is tcp)")
 	showVer = flag.Bool("v", false, "Show version")
+	verbose = flag.Int("verbose", 0, "Verbosity level")
 )
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -139,6 +140,38 @@ func CalcLatency(repeats int, useHTTP bool) *AWSRegions {
 	return &regions
 }
 
+// LatencyOutput prints data into console
+type LatencyOutput struct {
+	Level int
+}
+
+func (lo *LatencyOutput) show0(regions *AWSRegions) {
+	outFmt := "%-15s %20s\n"
+	for _, r := range *regions {
+		ms := fmt.Sprintf("%.2f ms", r.GetLatency())
+		fmt.Printf(outFmt, r.Code, ms)
+	}
+}
+
+func (lo *LatencyOutput) show1(regions *AWSRegions) {
+	outFmt := "%5v %-15s %-30s %20s\n"
+	fmt.Printf(outFmt, "", "Code", "Region", "Latency")
+	for i, r := range *regions {
+		ms := fmt.Sprintf("%.2f ms", r.GetLatency())
+		fmt.Printf(outFmt, i, r.Code, r.Name, ms)
+	}
+}
+
+// Show print data
+func (lo *LatencyOutput) Show(regions *AWSRegions) {
+	switch lo.Level {
+	case 0:
+		lo.show0(regions)
+	case 1:
+		lo.show1(regions)
+	}
+}
+
 func main() {
 
 	flag.Parse()
@@ -148,14 +181,9 @@ func main() {
 		os.Exit(0)
 	}
 
-	regions := *CalcLatency(*repeats, *useHTTP)
-
-	outFmt := "%5v %-30s %20s\n"
-	fmt.Printf(outFmt, "", "Region", "Latency")
-	for i, r := range regions {
-		ms := fmt.Sprintf("%.2f ms", r.GetLatency())
-		fmt.Printf(outFmt, i, r.Name, ms)
-	}
+	regions := CalcLatency(*repeats, *useHTTP)
+	lo := LatencyOutput{*verbose}
+	lo.Show(regions)
 }
 
 func init() {
