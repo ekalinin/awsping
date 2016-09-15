@@ -65,9 +65,12 @@ func (r *AWSRegion) CheckLatencyTCP(wg *sync.WaitGroup) {
 	defer wg.Done()
 	tcpAddr, err := net.ResolveTCPAddr("tcp4",
 		fmt.Sprintf("dynamodb.%s.amazonaws.com:80", r.Code))
-
+	if err != nil {
+		r.Error = err
+		return
+	}
 	start := time.Now()
-	conn, _ := net.DialTCP("tcp", nil, tcpAddr)
+	conn, err := net.DialTCP("tcp", nil, tcpAddr)
 	r.Latencies = append(r.Latencies, time.Since(start))
 	defer conn.Close()
 
