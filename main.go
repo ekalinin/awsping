@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"net"
 	"net/http"
@@ -71,8 +70,6 @@ func (r *AWSRegion) CheckLatencyTCP(wg *sync.WaitGroup) {
 	conn, _ := net.DialTCP("tcp", nil, tcpAddr)
 	r.Latencies = append(r.Latencies, time.Since(start))
 	defer conn.Close()
-	_, _ = conn.Write([]byte("HEAD / HTTP/1.0\r\n\r\n"))
-	_, _ = ioutil.ReadAll(conn)
 
 	r.Error = err
 }
