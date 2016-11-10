@@ -106,6 +106,7 @@ func (rs AWSRegions) Swap(i, j int) {
 func CalcLatency(repeats int, useHTTP bool) *AWSRegions {
 	regions := AWSRegions{
 		{Name: "US-East (Virginia)", Code: "us-east-1"},
+		{Name: "US-East (Ohio)", Code: "us-east-2"},
 		{Name: "US-West (California)", Code: "us-west-1"},
 		{Name: "US-West (Oregon)", Code: "us-west-2"},
 		{Name: "Asia Pacific (Mumbai)", Code: "ap-south-1"},
