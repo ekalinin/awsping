@@ -147,10 +147,10 @@ type LatencyOutput struct {
 }
 
 func (lo *LatencyOutput) show0(regions *AWSRegions) {
-	outFmt := "%-15s %20s\n"
+	outFmt := "%-25s %20s\n"
 	for _, r := range *regions {
 		ms := fmt.Sprintf("%.2f ms", r.GetLatency())
-		fmt.Printf(outFmt, r.Code, ms)
+		fmt.Printf(outFmt, r.Name, ms)
 	}
 }
 
