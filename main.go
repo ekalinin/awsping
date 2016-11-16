@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -26,6 +28,11 @@ var (
 )
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+// Duration2ms converts time.Duration to ms (float64)
+func Duration2ms(d time.Duration) float64 {
+	return float64(d.Nanoseconds()) / 1000 / 1000
+}
 
 func mkRandoString(n int) string {
 	b := make([]rune, n)
@@ -82,7 +89,7 @@ func (r *AWSRegion) CheckLatencyTCP(wg *sync.WaitGroup) {
 func (r *AWSRegion) GetLatency() float64 {
 	sum := float64(0)
 	for _, l := range r.Latencies {
-		sum += float64(l.Nanoseconds()) / 1000 / 1000
+		sum += Duration2ms(l)
 	}
 	return sum / float64(len(r.Latencies))
 }
@@ -163,6 +170,32 @@ func (lo *LatencyOutput) show1(regions *AWSRegions) {
 	}
 }
 
+func (lo *LatencyOutput) show2(regions *AWSRegions) {
+	// format
+	outFmt := "%5v %-15s %-25s"
+	outFmt += strings.Repeat(" %15s", *repeats) + " %15s\n"
+	// header
+	outStr := []interface{}{"", "Code", "Region"}
+	for i := 0; i < *repeats; i++ {
+		outStr = append(outStr, "Try #"+strconv.Itoa(i+1))
+	}
+	outStr = append(outStr, "Avg Latency")
+
+	// show header
+	fmt.Printf(outFmt, outStr...)
+
+	// each region stats
+	for i, r := range *regions {
+		outData := []interface{}{strconv.Itoa(i), r.Code, r.Name}
+		for n := 0; n < *repeats; n++ {
+			outData = append(outData, fmt.Sprintf("%.2f ms",
+				Duration2ms(r.Latencies[n])))
+		}
+		outData = append(outData, fmt.Sprintf("%.2f ms", r.GetLatency()))
+		fmt.Printf(outFmt, outData...)
+	}
+}
+
 // Show print data
 func (lo *LatencyOutput) Show(regions *AWSRegions) {
 	switch lo.Level {
@@ -170,6 +203,8 @@ func (lo *LatencyOutput) Show(regions *AWSRegions) {
 		lo.show0(regions)
 	case 1:
 		lo.show1(regions)
+	case 2:
+		lo.show2(regions)
 	}
 }
 
