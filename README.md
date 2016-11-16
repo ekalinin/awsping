@@ -76,6 +76,23 @@ Asia Pacific (Singapore)             378.53 ms
    11 ap-southeast-1  Asia Pacific (Singapore)                  397.47 ms
 ```
 
+```bash
+➥ ./awsping -repeats 3 -verbose 2
+      Code            Region                             Try #1          Try #2          Try #3     Avg Latency
+    0 eu-central-1    Europe (Frankfurt)               45.18 ms        45.46 ms        45.68 ms        45.44 ms
+    1 eu-west-1       Europe (Ireland)                 61.89 ms        62.99 ms        62.98 ms        62.62 ms
+    2 us-east-1       US-East (Virginia)              125.15 ms       126.75 ms       126.49 ms       126.13 ms
+    3 us-east-2       US-East (Ohio)                  154.05 ms       154.28 ms       153.53 ms       153.96 ms
+    4 us-west-1       US-West (California)            196.20 ms       195.05 ms       193.76 ms       195.00 ms
+    5 us-west-2       US-West (Oregon)                204.04 ms       203.97 ms       203.84 ms       203.95 ms
+    6 ap-south-1      Asia Pacific (Mumbai)           175.27 ms       300.68 ms       172.18 ms       216.05 ms
+    7 sa-east-1       South America (São Paulo)       243.48 ms       247.12 ms       248.32 ms       246.31 ms
+    8 ap-northeast-1  Asia Pacific (Tokyo)            324.78 ms       312.70 ms       319.02 ms       318.83 ms
+    9 ap-northeast-2  Asia Pacific (Seoul)            328.96 ms       327.65 ms       326.17 ms       327.59 ms
+   10 ap-southeast-2  Asia Pacific (Sydney)           388.17 ms       347.74 ms       393.58 ms       376.50 ms
+   11 ap-southeast-1  Asia Pacific (Singapore)        409.53 ms       403.61 ms       405.84 ms       406.33 ms
+```
+
 # Get binary file
 
 ```bash
