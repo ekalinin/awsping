@@ -1,6 +1,6 @@
 NAME=awsping
 EXEC=${NAME}
-GOVER=1.7.3
+GOVER=1.7.4
 ENVNAME=${NAME}${GOVER}
 BUILD_DIR=build
 BUILD_OS="windows darwin freebsd linux"
