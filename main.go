@@ -25,12 +25,16 @@ var (
 	useHTTP = flag.Bool("http", false, "Use http transport (default is tcp)")
 	showVer = flag.Bool("v", false, "Show version")
 	verbose = flag.Int("verbose", 0, "Verbosity level")
+	service = flag.String("service", "dynamodb", "AWS Service: ec2, sdb, sns, sqs, ...")
 )
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 // Duration2ms converts time.Duration to ms (float64)
 func Duration2ms(d time.Duration) float64 {
+	if d.Nanoseconds() == nil {
+		return 0.0
+	}
 	return float64(d.Nanoseconds()) / 1000 / 1000
 }
 
@@ -46,6 +50,7 @@ func mkRandoString(n int) string {
 type AWSRegion struct {
 	Name      string
 	Code      string
+	Service   string
 	Latencies []time.Duration
 	Error     error
 }
@@ -53,7 +58,7 @@ type AWSRegion struct {
 // CheckLatencyHTTP Test Latency via HTTP
 func (r *AWSRegion) CheckLatencyHTTP(wg *sync.WaitGroup) {
 	defer wg.Done()
-	url := fmt.Sprintf("http://dynamodb.%s.amazonaws.com/ping?x=%s",
+	url := fmt.Sprintf("http://%s.%s.amazonaws.com/ping?x=%s", r.Service,
 		r.Code, mkRandoString(13))
 	client := &http.Client{}
 
@@ -71,8 +76,8 @@ func (r *AWSRegion) CheckLatencyHTTP(wg *sync.WaitGroup) {
 // CheckLatencyTCP Test Latency via TCP
 func (r *AWSRegion) CheckLatencyTCP(wg *sync.WaitGroup) {
 	defer wg.Done()
-	tcpAddr, err := net.ResolveTCPAddr("tcp4",
-		fmt.Sprintf("dynamodb.%s.amazonaws.com:80", r.Code))
+	tcpURI := fmt.Sprintf("%s.%s.amazonaws.com:80", r.Service, r.Code)
+	tcpAddr, err := net.ResolveTCPAddr("tcp4", tcpURI)
 	if err != nil {
 		r.Error = err
 		return
@@ -110,37 +115,33 @@ func (rs AWSRegions) Swap(i, j int) {
 }
 
 // CalcLatency returns list of aws regions sorted by Latency
-func CalcLatency(repeats int, useHTTP bool) *AWSRegions {
+func CalcLatency(repeats int, useHTTP bool, service string) *AWSRegions {
 	regions := AWSRegions{
-		{Name: "US-East (Virginia)", Code: "us-east-1"},
-		{Name: "US-East (Ohio)", Code: "us-east-2"},
-		{Name: "US-West (California)", Code: "us-west-1"},
-		{Name: "US-West (Oregon)", Code: "us-west-2"},
-		{Name: "Asia Pacific (Mumbai)", Code: "ap-south-1"},
-		{Name: "Asia Pacific (Seoul)", Code: "ap-northeast-2"},
-		{Name: "Asia Pacific (Singapore)", Code: "ap-southeast-1"},
-		{Name: "Asia Pacific (Sydney)", Code: "ap-southeast-2"},
-		{Name: "Asia Pacific (Tokyo)", Code: "ap-northeast-1"},
-		{Name: "Europe (Ireland)", Code: "eu-west-1"},
-		{Name: "Europe (Frankfurt)", Code: "eu-central-1"},
-		{Name: "South America (São Paulo)", Code: "sa-east-1"},
+		{Service: service, Name: "US-East (Virginia)", Code: "us-east-1"},
+		{Service: service, Name: "US-East (Ohio)", Code: "us-east-2"},
+		{Service: service, Name: "US-West (California)", Code: "us-west-1"},
+		{Service: service, Name: "US-West (Oregon)", Code: "us-west-2"},
+		{Service: service, Name: "Asia Pacific (Mumbai)", Code: "ap-south-1"},
+		{Service: service, Name: "Asia Pacific (Seoul)", Code: "ap-northeast-2"},
+		{Service: service, Name: "Asia Pacific (Singapore)", Code: "ap-southeast-1"},
+		{Service: service, Name: "Asia Pacific (Sydney)", Code: "ap-southeast-2"},
+		{Service: service, Name: "Asia Pacific (Tokyo)", Code: "ap-northeast-1"},
+		{Service: service, Name: "Europe (Ireland)", Code: "eu-west-1"},
+		{Service: service, Name: "Europe (Frankfurt)", Code: "eu-central-1"},
+		{Service: service, Name: "South America (São Paulo)", Code: "sa-east-1"},
 		//{Name: "China (Beijing)", Code: "cn-north-1"},
 	}
 	var wg sync.WaitGroup
 
 	for n := 1; n <= repeats; n++ {
-
 		wg.Add(len(regions))
-
 		for i := range regions {
 			if useHTTP {
 				go regions[i].CheckLatencyHTTP(&wg)
 			} else {
 				go regions[i].CheckLatencyTCP(&wg)
 			}
-
 		}
-
 		wg.Wait()
 	}
 
@@ -154,10 +155,9 @@ type LatencyOutput struct {
 }
 
 func (lo *LatencyOutput) show0(regions *AWSRegions) {
-	outFmt := "%-25s %20s\n"
 	for _, r := range *regions {
-		ms := fmt.Sprintf("%.2f ms", r.GetLatency())
-		fmt.Printf(outFmt, r.Name, ms)
+		fmt.Printf("%-25s %20s\n", r.Name,
+			fmt.Sprintf("%.2f ms", r.GetLatency()))
 	}
 }
 
@@ -217,7 +217,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	regions := CalcLatency(*repeats, *useHTTP)
+	regions := CalcLatency(*repeats, *useHTTP, *service)
 	lo := LatencyOutput{*verbose}
 	lo.Show(regions)
 }
