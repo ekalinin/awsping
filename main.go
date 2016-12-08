@@ -32,9 +32,6 @@ var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 // Duration2ms converts time.Duration to ms (float64)
 func Duration2ms(d time.Duration) float64 {
-	if d.Nanoseconds() == nil {
-		return 0.0
-	}
 	return float64(d.Nanoseconds()) / 1000 / 1000
 }
 
