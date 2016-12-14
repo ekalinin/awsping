@@ -19,7 +19,7 @@ run:
 test:
 	@go test -v
 
-release:
+release: buildall
 	git tag `grep "version" main.go | grep -o -E '[0-9]\.[0-9]\.[0-9]{1,2}'`
 	git push --tags origin master
 
