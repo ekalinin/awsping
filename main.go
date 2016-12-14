@@ -124,6 +124,7 @@ func CalcLatency(repeats int, useHTTP bool, service string) *AWSRegions {
 		{Service: service, Name: "Asia Pacific (Sydney)", Code: "ap-southeast-2"},
 		{Service: service, Name: "Asia Pacific (Tokyo)", Code: "ap-northeast-1"},
 		{Service: service, Name: "Europe (Ireland)", Code: "eu-west-1"},
+		{Service: service, Name: "Europe (London)", Code: "eu-west-2"},
 		{Service: service, Name: "Europe (Frankfurt)", Code: "eu-central-1"},
 		{Service: service, Name: "South America (São Paulo)", Code: "sa-east-1"},
 		//{Name: "China (Beijing)", Code: "cn-north-1"},
