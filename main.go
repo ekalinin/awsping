@@ -81,6 +81,10 @@ func (r *AWSRegion) CheckLatencyTCP(wg *sync.WaitGroup) {
 	}
 	start := time.Now()
 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	if err != nil {
+		r.Error = err
+		return
+	}
 	r.Latencies = append(r.Latencies, time.Since(start))
 	defer conn.Close()
 
@@ -94,6 +98,14 @@ func (r *AWSRegion) GetLatency() float64 {
 		sum += Duration2ms(l)
 	}
 	return sum / float64(len(r.Latencies))
+}
+
+// GetLatencyStr returns Latency in string
+func (r *AWSRegion) GetLatencyStr() string {
+	if r.Error != nil {
+		return r.Error.Error()
+	}
+	return fmt.Sprintf("%.2f ms", r.GetLatency())
 }
 
 // AWSRegions slice of the AWSRegion
@@ -154,8 +166,7 @@ type LatencyOutput struct {
 
 func (lo *LatencyOutput) show0(regions *AWSRegions) {
 	for _, r := range *regions {
-		fmt.Printf("%-25s %20s\n", r.Name,
-			fmt.Sprintf("%.2f ms", r.GetLatency()))
+		fmt.Printf("%-25s %20s\n", r.Name, r.GetLatencyStr())
 	}
 }
 
@@ -163,8 +174,7 @@ func (lo *LatencyOutput) show1(regions *AWSRegions) {
 	outFmt := "%5v %-15s %-30s %20s\n"
 	fmt.Printf(outFmt, "", "Code", "Region", "Latency")
 	for i, r := range *regions {
-		ms := fmt.Sprintf("%.2f ms", r.GetLatency())
-		fmt.Printf(outFmt, i, r.Code, r.Name, ms)
+		fmt.Printf(outFmt, i, r.Code, r.Name, r.GetLatencyStr())
 	}
 }
 
