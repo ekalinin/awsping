@@ -96,11 +96,11 @@ Asia Pacific (Singapore)             378.53 ms
 # Get binary file
 
 ```bash
-$ wget https://github.com/ekalinin/awsping/releases/download/0.3.0/awsping.linux.amd64.tgz
+$ wget https://github.com/ekalinin/awsping/releases/download/0.5.2/awsping.linux.amd64.tgz
 $ tar xzvf awsping.linux.amd64.tgz
 $ chmod +x awsping
 $ ./awsping -v
-0.3.0
+0.5.2
 ```
 
 # Build from sources
