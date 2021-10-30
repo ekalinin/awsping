@@ -21,11 +21,12 @@ var (
 )
 
 var (
-	repeats = flag.Int("repeats", 1, "Number of repeats")
-	useHTTP = flag.Bool("http", false, "Use http transport (default is tcp)")
-	showVer = flag.Bool("v", false, "Show version")
-	verbose = flag.Int("verbose", 0, "Verbosity level")
-	service = flag.String("service", "dynamodb", "AWS Service: ec2, sdb, sns, sqs, ...")
+	repeats  = flag.Int("repeats", 1, "Number of repeats")
+	useHTTP  = flag.Bool("http", false, "Use http transport (default is tcp)")
+	useHTTPS = flag.Bool("https", false, "Use https transport (default is tcp)")
+	showVer  = flag.Bool("v", false, "Show version")
+	verbose  = flag.Int("verbose", 0, "Verbosity level")
+	service  = flag.String("service", "dynamodb", "AWS Service: ec2, sdb, sns, sqs, ...")
 )
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -53,9 +54,14 @@ type AWSRegion struct {
 }
 
 // CheckLatencyHTTP Test Latency via HTTP
-func (r *AWSRegion) CheckLatencyHTTP(wg *sync.WaitGroup) {
+func (r *AWSRegion) CheckLatencyHTTP(wg *sync.WaitGroup, https bool) {
 	defer wg.Done()
-	url := fmt.Sprintf("http://%s.%s.amazonaws.com/ping?x=%s", r.Service,
+	proto := "http"
+	if https {
+		proto = "https"
+	}
+
+	url := fmt.Sprintf("%s://%s.%s.amazonaws.com/ping?x=%s", proto, r.Service,
 		r.Code, mkRandoString(13))
 	client := &http.Client{}
 
@@ -124,7 +130,7 @@ func (rs AWSRegions) Swap(i, j int) {
 }
 
 // CalcLatency returns list of aws regions sorted by Latency
-func CalcLatency(repeats int, useHTTP bool, service string) *AWSRegions {
+func CalcLatency(repeats int, useHTTP bool, useHTTPS bool, service string) *AWSRegions {
 	regions := AWSRegions{
 		{Service: service, Name: "US-East (Virginia)", Code: "us-east-1"},
 		{Service: service, Name: "US-East (Ohio)", Code: "us-east-2"},
@@ -154,8 +160,8 @@ func CalcLatency(repeats int, useHTTP bool, service string) *AWSRegions {
 	for n := 1; n <= repeats; n++ {
 		wg.Add(len(regions))
 		for i := range regions {
-			if useHTTP {
-				go regions[i].CheckLatencyHTTP(&wg)
+			if useHTTP || useHTTPS {
+				go regions[i].CheckLatencyHTTP(&wg, useHTTPS)
 			} else {
 				go regions[i].CheckLatencyTCP(&wg)
 			}
@@ -233,7 +239,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	regions := CalcLatency(*repeats, *useHTTP, *service)
+	regions := CalcLatency(*repeats, *useHTTP, *useHTTPS, *service)
 	lo := LatencyOutput{*verbose}
 	lo.Show(regions)
 }
