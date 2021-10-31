@@ -147,7 +147,6 @@ func CalcLatency(repeats int, useHTTP bool, service string) *AWSRegions {
 		{Service: service, Name: "Asia Pacific (Sydney)", Code: "ap-southeast-2"},
 		{Service: service, Name: "South America (São Paulo)", Code: "sa-east-1"},
 		{Service: service, Name: "Middle East (Bahrain)", Code: "me-south-1"},
-		{Service: service, Name: "South America (São Paulo)", Code: "sa-east-1"},
 	}
 	var wg sync.WaitGroup
 
