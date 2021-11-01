@@ -126,9 +126,9 @@ func (rs AWSRegions) Swap(i, j int) {
 // CalcLatency returns list of aws regions sorted by Latency
 func CalcLatency(repeats int, useHTTP bool, service string) *AWSRegions {
 	regions := AWSRegions{
-		{Service: service, Name: "US-East (Virginia)", Code: "us-east-1"},
+		{Service: service, Name: "US-East (N. Virginia)", Code: "us-east-1"},
 		{Service: service, Name: "US-East (Ohio)", Code: "us-east-2"},
-		{Service: service, Name: "US-West (California)", Code: "us-west-1"},
+		{Service: service, Name: "US-West (N. California)", Code: "us-west-1"},
 		{Service: service, Name: "US-West (Oregon)", Code: "us-west-2"},
 		{Service: service, Name: "Canada (Central)", Code: "ca-central-1"},
 		{Service: service, Name: "Europe (Ireland)", Code: "eu-west-1"},
@@ -138,7 +138,7 @@ func CalcLatency(repeats int, useHTTP bool, service string) *AWSRegions {
 		{Service: service, Name: "Europe (Paris)", Code: "eu-west-3"},
 		{Service: service, Name: "Europe (Stockholm)", Code: "eu-north-1"},
 		{Service: service, Name: "Africa (Cape Town)", Code: "af-south-1"},
-		{Service: service, Name: "Asia Pacific (Osaka-Local)", Code: "ap-northeast-3"},
+		{Service: service, Name: "Asia Pacific (Osaka)", Code: "ap-northeast-3"},
 		{Service: service, Name: "Asia Pacific (Hong Kong)", Code: "ap-east-1"},
 		{Service: service, Name: "Asia Pacific (Tokyo)", Code: "ap-northeast-1"},
 		{Service: service, Name: "Asia Pacific (Seoul)", Code: "ap-northeast-2"},
