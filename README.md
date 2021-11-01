@@ -108,3 +108,9 @@ $ ./awsping -v
 ```bash
 ➥ make build
 ```
+
+# Build a Docker image
+
+```
+$ docker build -t awsping .
+```
