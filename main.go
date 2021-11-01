@@ -55,8 +55,7 @@ type AWSRegion struct {
 // CheckLatencyHTTP Test Latency via HTTP
 func (r *AWSRegion) CheckLatencyHTTP(wg *sync.WaitGroup) {
 	defer wg.Done()
-	url := fmt.Sprintf("http://%s.%s.amazonaws.com/ping?x=%s", r.Service,
-		r.Code, mkRandoString(13))
+	url := fmt.Sprintf("http://%s/ping?x=%s", r.GetTarget(), mkRandoString(13))
 	client := &http.Client{}
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -70,11 +69,16 @@ func (r *AWSRegion) CheckLatencyHTTP(wg *sync.WaitGroup) {
 	r.Error = err
 }
 
+func (r *AWSRegion) GetTarget() string {
+	return fmt.Sprintf("%s.%s.amazonaws.com", r.Service, r.Code)
+}
+
 // CheckLatencyTCP Test Latency via TCP
 func (r *AWSRegion) CheckLatencyTCP(wg *sync.WaitGroup) {
 	defer wg.Done()
-	tcpURI := fmt.Sprintf("%s.%s.amazonaws.com:80", r.Service, r.Code)
+	tcpURI := fmt.Sprintf("%s:80", r.GetTarget())
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", tcpURI)
+
 	if err != nil {
 		r.Error = err
 		return
