@@ -109,8 +109,21 @@ $ ./awsping -v
 ➥ make build
 ```
 
-# Build a Docker image
+# Use with Docker
+## Build a Docker image
 
 ```
 $ docker build -t awsping .
+```
+
+## Run the Docker image
+```
+$ docker run --rm awsping
+```
+
+Arguments can be used as mentioned in the _Usage_ section.
+
+i.e.:
+```
+$ docker run --rm awsping -repeats 3 -verbose 2
 ```
