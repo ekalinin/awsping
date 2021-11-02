@@ -6,7 +6,7 @@ Console tool to check the latency to each AWS region
 ## Test via TCP
 
 ```bash
-➥ ./awsping 
+➥ ./awsping
 Europe (Frankfurt)                    51.86 ms
 Europe (Ireland)                      62.86 ms
 US-East (Virginia)                   126.39 ms
@@ -39,6 +39,33 @@ Asia Pacific (Tokyo)                 745.24 ms
 Asia Pacific (Singapore)             847.36 ms
 ```
 
+## Test via HTTPS
+
+```bash
+➥ ./awsping -https
+Europe (Stockholm)                   216.67 ms
+Europe (Frankfurt)                   263.20 ms
+Europe (Paris)                       284.32 ms
+Europe (Milan)                       305.63 ms
+Europe (Ireland)                     327.34 ms
+Europe (London)                      332.17 ms
+Middle East (Bahrain)                590.74 ms
+US-East (N. Virginia)                595.13 ms
+Canada (Central)                     628.44 ms
+US-East (Ohio)                       635.32 ms
+Asia Pacific (Mumbai)                755.56 ms
+Asia Pacific (Hong Kong)             843.90 ms
+US-West (N. California)              870.65 ms
+Asia Pacific (Singapore)             899.50 ms
+Africa (Cape Town)                   912.06 ms
+US-West (Oregon)                     919.34 ms
+South America (São Paulo)            985.93 ms
+Asia Pacific (Tokyo)                1122.67 ms
+Asia Pacific (Seoul)                1138.76 ms
+Asia Pacific (Osaka)                1167.40 ms
+Asia Pacific (Sydney)               1328.90 ms
+```
+
 ## Test several times
 
 ```bash
@@ -55,7 +82,7 @@ Asia Pacific (Tokyo)                 308.52 ms
 Asia Pacific (Seoul)                 325.93 ms
 Asia Pacific (Sydney)                349.62 ms
 Asia Pacific (Singapore)             378.53 ms
-``` 
+```
 
 ## Verbose mode
 
@@ -107,4 +134,23 @@ $ ./awsping -v
 
 ```bash
 ➥ make build
+```
+
+# Use with Docker
+## Build a Docker image
+
+```
+$ docker build -t awsping .
+```
+
+## Run the Docker image
+```
+$ docker run --rm awsping
+```
+
+Arguments can be used as mentioned in the _Usage_ section.
+
+i.e.:
+```
+$ docker run --rm awsping -repeats 3 -verbose 2
 ```

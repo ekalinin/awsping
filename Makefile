@@ -59,3 +59,5 @@ env-deps:
 env:
 	@bash -c ". ~/.envirius/nv && nv use ${ENVNAME}"
 
+docker:
+	docker build -t awsping .

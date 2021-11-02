@@ -21,11 +21,12 @@ var (
 )
 
 var (
-	repeats = flag.Int("repeats", 1, "Number of repeats")
-	useHTTP = flag.Bool("http", false, "Use http transport (default is tcp)")
-	showVer = flag.Bool("v", false, "Show version")
-	verbose = flag.Int("verbose", 0, "Verbosity level")
-	service = flag.String("service", "dynamodb", "AWS Service: ec2, sdb, sns, sqs, ...")
+	repeats  = flag.Int("repeats", 1, "Number of repeats")
+	useHTTP  = flag.Bool("http", false, "Use http transport (default is tcp)")
+	useHTTPS = flag.Bool("https", false, "Use https transport (default is tcp)")
+	showVer  = flag.Bool("v", false, "Show version")
+	verbose  = flag.Int("verbose", 0, "Verbosity level")
+	service  = flag.String("service", "dynamodb", "AWS Service: ec2, sdb, sns, sqs, ...")
 )
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -58,9 +59,10 @@ type AWSTarget struct {
 }
 
 // CheckLatencyHTTP Test Latency via HTTP
-func (r *AWSRegion) CheckLatencyHTTP(wg *sync.WaitGroup) {
+func (r *AWSRegion) CheckLatencyHTTP(wg *sync.WaitGroup, https bool) {
 	defer wg.Done()
 	url := fmt.Sprintf("http://%s/ping?x=%s", r.GetTarget().Hostname, mkRandoString(13))
+
 	client := &http.Client{}
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -140,11 +142,11 @@ func (rs AWSRegions) Swap(i, j int) {
 }
 
 // CalcLatency returns list of aws regions sorted by Latency
-func CalcLatency(repeats int, useHTTP bool, service string) *AWSRegions {
+func CalcLatency(repeats int, useHTTP bool, useHTTPS bool, service string) *AWSRegions {
 	regions := AWSRegions{
-		{Service: service, Name: "US-East (Virginia)", Code: "us-east-1"},
+		{Service: service, Name: "US-East (N. Virginia)", Code: "us-east-1"},
 		{Service: service, Name: "US-East (Ohio)", Code: "us-east-2"},
-		{Service: service, Name: "US-West (California)", Code: "us-west-1"},
+		{Service: service, Name: "US-West (N. California)", Code: "us-west-1"},
 		{Service: service, Name: "US-West (Oregon)", Code: "us-west-2"},
 		{Service: service, Name: "Canada (Central)", Code: "ca-central-1"},
 		{Service: service, Name: "Europe (Ireland)", Code: "eu-west-1"},
@@ -154,7 +156,7 @@ func CalcLatency(repeats int, useHTTP bool, service string) *AWSRegions {
 		{Service: service, Name: "Europe (Paris)", Code: "eu-west-3"},
 		{Service: service, Name: "Europe (Stockholm)", Code: "eu-north-1"},
 		{Service: service, Name: "Africa (Cape Town)", Code: "af-south-1"},
-		{Service: service, Name: "Asia Pacific (Osaka-Local)", Code: "ap-northeast-3"},
+		{Service: service, Name: "Asia Pacific (Osaka)", Code: "ap-northeast-3"},
 		{Service: service, Name: "Asia Pacific (Hong Kong)", Code: "ap-east-1"},
 		{Service: service, Name: "Asia Pacific (Tokyo)", Code: "ap-northeast-1"},
 		{Service: service, Name: "Asia Pacific (Seoul)", Code: "ap-northeast-2"},
@@ -163,15 +165,14 @@ func CalcLatency(repeats int, useHTTP bool, service string) *AWSRegions {
 		{Service: service, Name: "Asia Pacific (Sydney)", Code: "ap-southeast-2"},
 		{Service: service, Name: "South America (São Paulo)", Code: "sa-east-1"},
 		{Service: service, Name: "Middle East (Bahrain)", Code: "me-south-1"},
-		{Service: service, Name: "South America (São Paulo)", Code: "sa-east-1"},
 	}
 	var wg sync.WaitGroup
 
 	for n := 1; n <= repeats; n++ {
 		wg.Add(len(regions))
 		for i := range regions {
-			if useHTTP {
-				go regions[i].CheckLatencyHTTP(&wg)
+			if useHTTP || useHTTPS {
+				go regions[i].CheckLatencyHTTP(&wg, useHTTPS)
 			} else {
 				go regions[i].CheckLatencyTCP(&wg)
 			}
@@ -249,7 +250,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	regions := CalcLatency(*repeats, *useHTTP, *service)
+	regions := CalcLatency(*repeats, *useHTTP, *useHTTPS, *service)
 	lo := LatencyOutput{*verbose}
 	lo.Show(regions)
 }
