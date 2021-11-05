@@ -1,7 +1,5 @@
 NAME=awsping
 EXEC=${NAME}
-GOVER=1.7.4
-ENVNAME=${NAME}${GOVER}
 BUILD_DIR=build
 BUILD_OS="windows darwin freebsd linux"
 BUILD_ARCH="amd64 386"
@@ -18,7 +16,7 @@ test:
 	@go test -v
 
 release: buildall
-	git tag `grep "version" main.go | grep -o -E '[0-9]\.[0-9]\.[0-9]{1,2}'`
+	git tag `grep "Version" utils.go | grep -o -E '[0-9]\.[0-9]\.[0-9]{1,2}'`
 	git push --tags origin master
 
 clean:
