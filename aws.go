@@ -1,48 +1,13 @@
-package main
+package awsping
 
 import (
-	"flag"
 	"fmt"
-	"math/rand"
 	"net"
 	"net/http"
-	"os"
 	"sort"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
-
-var (
-	version   = "1.0.0"
-	github    = "https://github.com/ekalinin/awsping"
-	useragent = fmt.Sprintf("AwsPing/%s (+%s)", version, github)
-)
-
-var (
-	repeats  = flag.Int("repeats", 1, "Number of repeats")
-	useHTTP  = flag.Bool("http", false, "Use http transport (default is tcp)")
-	useHTTPS = flag.Bool("https", false, "Use https transport (default is tcp)")
-	showVer  = flag.Bool("v", false, "Show version")
-	verbose  = flag.Int("verbose", 0, "Verbosity level")
-	service  = flag.String("service", "dynamodb", "AWS Service: ec2, sdb, sns, sqs, ...")
-)
-
-var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-// Duration2ms converts time.Duration to ms (float64)
-func Duration2ms(d time.Duration) float64 {
-	return float64(d.Nanoseconds()) / 1000 / 1000
-}
-
-func mkRandoString(n int) string {
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
-	}
-	return string(b)
-}
 
 // AWSRegion description of the AWS EC2 region
 type AWSRegion struct {
@@ -53,6 +18,7 @@ type AWSRegion struct {
 	Error     error
 }
 
+// AWSTarget describes aws region network details (host, ip)
 type AWSTarget struct {
 	Hostname string
 	IPAddr   *net.IPAddr
@@ -182,79 +148,4 @@ func CalcLatency(repeats int, useHTTP bool, useHTTPS bool, service string) *AWSR
 
 	sort.Sort(regions)
 	return &regions
-}
-
-// LatencyOutput prints data into console
-type LatencyOutput struct {
-	Level int
-}
-
-func (lo *LatencyOutput) show0(regions *AWSRegions) {
-	for _, r := range *regions {
-		fmt.Printf("%-25s %20s\n", r.Name, r.GetLatencyStr())
-	}
-}
-
-func (lo *LatencyOutput) show1(regions *AWSRegions) {
-	outFmt := "%5v %-15s %-30s %20s\n"
-	fmt.Printf(outFmt, "", "Code", "Region", "Latency")
-	for i, r := range *regions {
-		fmt.Printf(outFmt, i, r.Code, r.Name, r.GetLatencyStr())
-	}
-}
-
-func (lo *LatencyOutput) show2(regions *AWSRegions) {
-	// format
-	outFmt := "%5v %-15s %-25s"
-	outFmt += strings.Repeat(" %15s", *repeats) + " %15s\n"
-	// header
-	outStr := []interface{}{"", "Code", "Region"}
-	for i := 0; i < *repeats; i++ {
-		outStr = append(outStr, "Try #"+strconv.Itoa(i+1))
-	}
-	outStr = append(outStr, "Avg Latency")
-
-	// show header
-	fmt.Printf(outFmt, outStr...)
-
-	// each region stats
-	for i, r := range *regions {
-		outData := []interface{}{strconv.Itoa(i), r.Code, r.Name}
-		for n := 0; n < *repeats; n++ {
-			outData = append(outData, fmt.Sprintf("%.2f ms",
-				Duration2ms(r.Latencies[n])))
-		}
-		outData = append(outData, fmt.Sprintf("%.2f ms", r.GetLatency()))
-		fmt.Printf(outFmt, outData...)
-	}
-}
-
-// Show print data
-func (lo *LatencyOutput) Show(regions *AWSRegions) {
-	switch lo.Level {
-	case 0:
-		lo.show0(regions)
-	case 1:
-		lo.show1(regions)
-	case 2:
-		lo.show2(regions)
-	}
-}
-
-func main() {
-
-	flag.Parse()
-
-	if *showVer {
-		fmt.Println(version)
-		os.Exit(0)
-	}
-
-	regions := CalcLatency(*repeats, *useHTTP, *useHTTPS, *service)
-	lo := LatencyOutput{*verbose}
-	lo.Show(regions)
-}
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
 }

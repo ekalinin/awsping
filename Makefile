@@ -7,14 +7,11 @@ BUILD_OS="windows darwin freebsd linux"
 BUILD_ARCH="amd64 386"
 BUILD_DIR=build
 
-build: deps
-	go build -o ${EXEC} main.go
-
-deps:
-	echo "no deps yet"
+build:
+	go build -o ${EXEC} cmd/awsping/main.go
 
 run:
-	./${EXEC}
+	go run cmd/awsping/main.go
 
 test:
 	@go test -v
