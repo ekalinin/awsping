@@ -53,16 +53,16 @@ type AWSRegion struct {
 	Error     error
 }
 
+type AWSTarget struct {
+	Hostname string
+	IPAddr   *net.IPAddr
+}
+
 // CheckLatencyHTTP Test Latency via HTTP
 func (r *AWSRegion) CheckLatencyHTTP(wg *sync.WaitGroup, https bool) {
 	defer wg.Done()
-	proto := "http"
-	if https {
-		proto = "https"
-	}
+	url := fmt.Sprintf("http://%s/ping?x=%s", r.GetTarget().Hostname, mkRandoString(13))
 
-	url := fmt.Sprintf("%s://%s.%s.amazonaws.com/ping?x=%s", proto, r.Service,
-		r.Code, mkRandoString(13))
 	client := &http.Client{}
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -76,17 +76,29 @@ func (r *AWSRegion) CheckLatencyHTTP(wg *sync.WaitGroup, https bool) {
 	r.Error = err
 }
 
+func (r *AWSRegion) GetTarget() AWSTarget {
+
+	hostname := fmt.Sprintf("%s.%s.amazonaws.com", r.Service, r.Code)
+	ipAddr, _ := net.ResolveIPAddr("ip4", hostname)
+
+	return AWSTarget{
+		Hostname: hostname,
+		IPAddr:   ipAddr,
+	}
+
+}
+
 // CheckLatencyTCP Test Latency via TCP
 func (r *AWSRegion) CheckLatencyTCP(wg *sync.WaitGroup) {
 	defer wg.Done()
-	tcpURI := fmt.Sprintf("%s.%s.amazonaws.com:80", r.Service, r.Code)
-	tcpAddr, err := net.ResolveTCPAddr("tcp4", tcpURI)
-	if err != nil {
-		r.Error = err
-		return
-	}
+
+	tcpAddr :=
+		net.TCPAddr{
+			IP:   r.GetTarget().IPAddr.IP,
+			Port: 80}
+
 	start := time.Now()
-	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	conn, err := net.DialTCP("tcp", nil, &tcpAddr)
 	if err != nil {
 		r.Error = err
 		return
