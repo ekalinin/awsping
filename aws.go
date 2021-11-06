@@ -107,9 +107,9 @@ func (rs AWSRegions) Swap(i, j int) {
 	rs[i], rs[j] = rs[j], rs[i]
 }
 
-// CalcLatency returns list of aws regions sorted by Latency
-func CalcLatency(repeats int, useHTTP bool, useHTTPS bool, service string) *AWSRegions {
-	regions := AWSRegions{
+// GetRegions returns a list of regions
+func GetRegions(service string) AWSRegions {
+	return AWSRegions{
 		{Service: service, Name: "US-East (N. Virginia)", Code: "us-east-1"},
 		{Service: service, Name: "US-East (Ohio)", Code: "us-east-2"},
 		{Service: service, Name: "US-West (N. California)", Code: "us-west-1"},
@@ -132,6 +132,11 @@ func CalcLatency(repeats int, useHTTP bool, useHTTPS bool, service string) *AWSR
 		{Service: service, Name: "South America (São Paulo)", Code: "sa-east-1"},
 		{Service: service, Name: "Middle East (Bahrain)", Code: "me-south-1"},
 	}
+}
+
+// CalcLatency returns list of aws regions sorted by Latency
+func CalcLatency(repeats int, useHTTP bool, useHTTPS bool, service string) *AWSRegions {
+	regions := GetRegions(service)
 	var wg sync.WaitGroup
 
 	for n := 1; n <= repeats; n++ {

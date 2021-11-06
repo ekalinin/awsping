@@ -120,6 +120,26 @@ Asia Pacific (Singapore)             378.53 ms
    11 ap-southeast-1  Asia Pacific (Singapore)        409.53 ms       403.61 ms       405.84 ms       406.33 ms
 ```
 
+## Get Help
+
+```bash
+➜ ./awsping -h
+Usage of ./awsping:
+  -http
+    	Use http transport (default is tcp)
+  -https
+    	Use https transport (default is tcp)
+  -list-regions
+    	Show list of regions
+  -repeats int
+    	Number of repeats (default 1)
+  -service string
+    	AWS Service: ec2, sdb, sns, sqs, ... (default "dynamodb")
+  -v	Show version
+  -verbose int
+    	Verbosity level
+```
+
 # Get binary file
 
 ```bash

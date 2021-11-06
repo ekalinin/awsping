@@ -14,6 +14,10 @@ var (
 	useragent = fmt.Sprintf("AwsPing/%s (+%s)", Version, github)
 )
 
+const (
+	ShowOnlyRegions = -1
+)
+
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 // Duration2ms converts time.Duration to ms (float64)
@@ -33,6 +37,12 @@ func mkRandoString(n int) string {
 type LatencyOutput struct {
 	Level   int
 	Repeats int
+}
+
+func (lo *LatencyOutput) show(regions *AWSRegions) {
+	for _, r := range *regions {
+		fmt.Printf("%-15s %-20s\n", r.Code, r.Name)
+	}
 }
 
 func (lo *LatencyOutput) show0(regions *AWSRegions) {
@@ -78,6 +88,8 @@ func (lo *LatencyOutput) show2(regions *AWSRegions) {
 // Show print data
 func (lo *LatencyOutput) Show(regions *AWSRegions) {
 	switch lo.Level {
+	case ShowOnlyRegions:
+		lo.show(regions)
 	case 0:
 		lo.show0(regions)
 	case 1:
