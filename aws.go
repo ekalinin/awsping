@@ -32,6 +32,9 @@ func (r *AWSRegion) CheckLatencyHTTP(wg *sync.WaitGroup, https bool) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		r.Error = err
+	}
 	req.Header.Set("User-Agent", useragent)
 
 	start := time.Now()
