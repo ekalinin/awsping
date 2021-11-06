@@ -1,6 +1,21 @@
 # awsping
 Console tool to check the latency to each AWS region
 
+# ToC
+
+* [Usage](#usage)
+  * [Test via TCP](#test-via-tcp)
+  * [Test via HTTP](#test-via-http)
+  * [Test via HTTPS](#test-via-https)
+  * [Test several times](#test-several-times)
+  * [Verbose mode](#verbose-mode)
+  * [Get Help](#get-help)
+* [Get binary file](#get-binary-file)
+* [Build from sources](#build-from-sources)
+* [Use with Docker](#use-with-docker)
+  * [Build a Docker image](#build-a-docker-image)
+  * [Run the Docker image](#run-the-docker-image)
+
 # Usage
 
 ## Test via TCP
