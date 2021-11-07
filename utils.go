@@ -29,7 +29,8 @@ func Duration2ms(d time.Duration) float64 {
 	return float64(d.Nanoseconds()) / 1000 / 1000
 }
 
-func mkRandoString(n int) string {
+// mkRandomString returns rundom string
+func mkRandomString(n int) string {
 	b := make([]rune, n)
 	for i := range b {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]

@@ -148,7 +148,7 @@ func (rs AWSRegions) SetDefaultTarget() {
 			HTTPS:   r.Type == HTTPSCheck,
 			Code:    r.Code,
 			Service: r.Service,
-			Rnd:     mkRandoString(13),
+			Rnd:     mkRandomString(13),
 		}
 	})
 }

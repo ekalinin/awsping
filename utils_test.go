@@ -26,7 +26,7 @@ func TestRandomString(t *testing.T) {
 	}
 
 	for idx, test := range tests {
-		test.res = mkRandoString(test.n)
+		test.res = mkRandomString(test.n)
 		if len(test.res) != test.n {
 			t.Errorf("Try %d: n=%d, got: %s (len=%d), want: %d.",
 				idx, test.n, test.res, len(test.res), test.n)
