@@ -7,7 +7,7 @@ BUILD_DIR=build
 SRC_CMD=cmd/awsping/main.go
 
 build:
-	go build -o ${EXEC} ${SRC_CMD}
+	go build -race -o ${EXEC} ${SRC_CMD}
 
 # make run ARGS="-h"
 run:
