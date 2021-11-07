@@ -13,7 +13,7 @@ run:
 	go run cmd/awsping/main.go
 
 test:
-	@go test -v
+	@go test -cover .
 
 release: buildall
 	git tag `grep "Version" utils.go | grep -o -E '[0-9]\.[0-9]\.[0-9]{1,2}'`
