@@ -10,8 +10,6 @@ import (
 	"github.com/ekalinin/awsping"
 )
 
-// TODO: add GH actions (build, tests, publish docker image?)
-
 var (
 	repeats     = flag.Int("repeats", 1, "Number of repeats")
 	useHTTP     = flag.Bool("http", false, "Use http transport (default is tcp)")
@@ -31,7 +29,7 @@ func main() {
 	}
 
 	if *listRegions {
-		regions := awsping.GetRegions(*service)
+		regions := awsping.GetRegions()
 		lo := awsping.NewOutput(awsping.ShowOnlyRegions, 0)
 		lo.Show(&regions)
 		os.Exit(0)

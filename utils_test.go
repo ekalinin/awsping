@@ -40,7 +40,7 @@ func TestOutputShowOnlyRegions(t *testing.T) {
 	lo := NewOutput(ShowOnlyRegions, 0)
 	lo.w = &b
 
-	regions := GetRegions("sqs")[:2]
+	regions := GetRegions()[:2]
 	lo.Show(&regions)
 
 	got := b.String()
@@ -57,7 +57,7 @@ func TestOutputShow0(t *testing.T) {
 	lo := NewOutput(0, 0)
 	lo.w = &b
 
-	regions := GetRegions("sqs")[:2]
+	regions := GetRegions()[:2]
 	regions[0].Latencies = []time.Duration{15 * time.Millisecond}
 	regions[1].Latencies = []time.Duration{25 * time.Millisecond}
 
@@ -77,7 +77,7 @@ func TestOutputShow1(t *testing.T) {
 	lo := NewOutput(1, 0)
 	lo.w = &b
 
-	regions := GetRegions("sqs")[:2]
+	regions := GetRegions()[:2]
 	regions[0].Latencies = []time.Duration{15 * time.Millisecond}
 	regions[1].Latencies = []time.Duration{25 * time.Millisecond}
 
@@ -98,7 +98,7 @@ func TestOutputShow2(t *testing.T) {
 	lo := NewOutput(2, 2)
 	lo.w = &b
 
-	regions := GetRegions("sqs")[:2]
+	regions := GetRegions()[:2]
 	regions[0].Latencies = []time.Duration{15 * time.Millisecond, 17 * time.Millisecond}
 	regions[1].Latencies = []time.Duration{25 * time.Millisecond, 26 * time.Millisecond}
 

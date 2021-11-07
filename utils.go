@@ -5,8 +5,10 @@ import (
 	"io"
 	"math/rand"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -108,4 +110,58 @@ func (lo *LatencyOutput) Show(regions *AWSRegions) {
 	case 2:
 		lo.show2(regions)
 	}
+}
+
+// GetRegions returns a list of regions
+func GetRegions() AWSRegions {
+	return AWSRegions{
+		NewRegion("US-East (N. Virginia)", "us-east-1"),
+		NewRegion("US-East (Ohio)", "us-east-2"),
+		NewRegion("US-West (N. California)", "us-west-1"),
+		NewRegion("US-West (Oregon)", "us-west-2"),
+		NewRegion("Canada (Central)", "ca-central-1"),
+		NewRegion("Europe (Ireland)", "eu-west-1"),
+		NewRegion("Europe (Frankfurt)", "eu-central-1"),
+		NewRegion("Europe (London)", "eu-west-2"),
+		NewRegion("Europe (Milan)", "eu-south-1"),
+		NewRegion("Europe (Paris)", "eu-west-3"),
+		NewRegion("Europe (Stockholm)", "eu-north-1"),
+		NewRegion("Africa (Cape Town)", "af-south-1"),
+		NewRegion("Asia Pacific (Osaka)", "ap-northeast-3"),
+		NewRegion("Asia Pacific (Hong Kong)", "ap-east-1"),
+		NewRegion("Asia Pacific (Tokyo)", "ap-northeast-1"),
+		NewRegion("Asia Pacific (Seoul)", "ap-northeast-2"),
+		NewRegion("Asia Pacific (Singapore)", "ap-southeast-1"),
+		NewRegion("Asia Pacific (Mumbai)", "ap-south-1"),
+		NewRegion("Asia Pacific (Sydney)", "ap-southeast-2"),
+		NewRegion("South America (São Paulo)", "sa-east-1"),
+		NewRegion("Middle East (Bahrain)", "me-south-1"),
+	}
+}
+
+// CalcLatency returns list of aws regions sorted by Latency
+func CalcLatency(repeats int, useHTTP bool, useHTTPS bool, service string) *AWSRegions {
+	regions := GetRegions()
+	regions.SetService(service)
+	switch {
+	case useHTTP:
+		regions.SetCheckType(HTTPCheck)
+	case useHTTPS:
+		regions.SetCheckType(HTTPSCheck)
+	default:
+		regions.SetCheckType(TCPCheck)
+	}
+	regions.SetDefaultTarget()
+
+	var wg sync.WaitGroup
+	for n := 1; n <= repeats; n++ {
+		wg.Add(len(regions))
+		for i := range regions {
+			go regions[i].CheckLatency(&wg)
+		}
+		wg.Wait()
+	}
+
+	sort.Sort(regions)
+	return &regions
 }
