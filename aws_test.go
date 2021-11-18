@@ -67,6 +67,21 @@ func TestAWSRegionCheckLatencyHTTP(t *testing.T) {
 	if got < want || got > want+2 {
 		t.Errorf("failed:\ngot=%f\nwant=%f", got, want)
 	}
+
+	// check "error"
+	errTxt := "something bad"
+	regions[0].Request = &testRequest{err: errors.New(errTxt)}
+
+	wg.Add(1)
+	regions[0].CheckLatency(&wg)
+
+	if regions[0].Error == nil {
+		t.Errorf("failed: error should not be empty")
+	}
+
+	if regions[0].Error.Error() != errTxt {
+		t.Errorf("failed: error should be empty=%s", errTxt)
+	}
 }
 
 type testRequest struct {
