@@ -69,13 +69,16 @@ func TestAWSRegionCheckLatencyHTTP(t *testing.T) {
 	}
 }
 
-type testDialler struct {
+type testRequest struct {
 	duration time.Duration
+	err      error
 }
 
-func (d *testDialler) Dial(network, address string) (net.Conn, error) {
-	time.Sleep(d.duration)
-	return nil, errors.New("Something bad")
+func (d *testRequest) Do(_, _ string, _ RequestType) (time.Duration, error) {
+	if d.err != nil {
+		return 0, d.err
+	}
+	return d.duration, nil
 }
 
 func TestAWSRegionCheckLatencyTCP(t *testing.T) {
@@ -94,7 +97,7 @@ func TestAWSRegionCheckLatencyTCP(t *testing.T) {
 	regions.SetTarget(func(r *AWSRegion) {
 		r.Target = &tt
 	})
-	regions[0].Dialler = &testDialler{duration: 15 * time.Millisecond}
+	regions[0].Request = &testRequest{duration: 15 * time.Millisecond}
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -107,8 +110,23 @@ func TestAWSRegionCheckLatencyTCP(t *testing.T) {
 		t.Errorf("failed:\ngot=%f\nwant=%f\nregion=%q", got, want, regions[0])
 	}
 
-	if len(regions[0].Error.Error()) == 0 {
+	if regions[0].Error != nil {
+		t.Errorf("failed: error should be empty")
+	}
+
+	// check "error"
+	errTxt := "something bad"
+	regions[0].Request = &testRequest{err: errors.New(errTxt)}
+
+	wg.Add(1)
+	regions[0].CheckLatency(&wg)
+
+	if regions[0].Error == nil {
 		t.Errorf("failed: error should not be empty")
+	}
+
+	if regions[0].Error.Error() != errTxt {
+		t.Errorf("failed: error should be empty=%s", errTxt)
 	}
 }
 

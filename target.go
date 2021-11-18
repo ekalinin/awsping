@@ -35,9 +35,3 @@ func (r *AWSTarget) GetIP() (*net.TCPAddr, error) {
 	tcpURI := fmt.Sprintf("%s.%s.amazonaws.com:80", r.Service, r.Code)
 	return net.ResolveTCPAddr("tcp4", tcpURI)
 }
-
-// --------------------------------------------
-
-type TargetDialler interface {
-	Dial(network, address string) (net.Conn, error)
-}

@@ -2,8 +2,6 @@ package awsping
 
 import (
 	"fmt"
-	"net"
-	"net/http"
 	"sync"
 	"time"
 )
@@ -28,7 +26,7 @@ type AWSRegion struct {
 	Type      CheckType
 
 	Target  Targetter
-	Dialler TargetDialler
+	Request Requester
 }
 
 func NewRegion(name, code string) AWSRegion {
@@ -36,7 +34,7 @@ func NewRegion(name, code string) AWSRegion {
 		Name:    name,
 		Code:    code,
 		Type:    TCPCheck,
-		Dialler: &net.Dialer{},
+		Request: &AWSRequest{},
 	}
 }
 
@@ -54,23 +52,12 @@ func (r *AWSRegion) CheckLatency(wg *sync.WaitGroup) {
 // checkLatencyHTTP Test Latency via HTTP
 func (r *AWSRegion) checkLatencyHTTP(https bool) {
 	url := r.Target.GetURL()
-	client := &http.Client{}
-
-	req, err := http.NewRequest("GET", url, nil)
+	l, err := r.Request.Do(useragent, url, RequestTypeHTTP)
 	if err != nil {
 		r.Error = err
 		return
 	}
-	req.Header.Set("User-Agent", useragent)
-
-	start := time.Now()
-	resp, err := client.Do(req)
-	r.Latencies = append(r.Latencies, time.Since(start))
-	if err != nil {
-		r.Error = err
-		return
-	}
-	defer resp.Body.Close()
+	r.Latencies = append(r.Latencies, l)
 }
 
 // checkLatencyTCP Test Latency via TCP
@@ -81,16 +68,12 @@ func (r *AWSRegion) checkLatencyTCP() {
 		return
 	}
 
-	start := time.Now()
-	conn, err := r.Dialler.Dial("tcp", tcpAddr.String())
+	l, err := r.Request.Do(useragent, tcpAddr.String(), RequestTypeTCP)
 	if err != nil {
 		r.Error = err
 		return
 	}
-	r.Latencies = append(r.Latencies, time.Since(start))
-	defer conn.Close()
-
-	r.Error = err
+	r.Latencies = append(r.Latencies, l)
 }
 
 // GetLatency returns Latency in ms
