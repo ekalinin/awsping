@@ -9,8 +9,11 @@ SRC_CMD=cmd/awsping/main.go
 build:
 	go build -race -o ${EXEC} ${SRC_CMD}
 
+lint:
+	goling
+
 # make run ARGS="-h"
-run:
+run: lint
 	go run cmd/awsping/main.go $(ARGS)
 
 test:
