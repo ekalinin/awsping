@@ -146,11 +146,11 @@ func CalcLatency(repeats int, useHTTP bool, useHTTPS bool, service string) *AWSR
 	regions.SetService(service)
 	switch {
 	case useHTTP:
-		regions.SetCheckType(HTTPCheck)
+		regions.SetCheckType(CheckTypeHTTP)
 	case useHTTPS:
-		regions.SetCheckType(HTTPSCheck)
+		regions.SetCheckType(CheckTypeHTTPS)
 	default:
-		regions.SetCheckType(TCPCheck)
+		regions.SetCheckType(CheckTypeTCP)
 	}
 	regions.SetDefaultTarget()
 

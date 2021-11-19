@@ -6,12 +6,16 @@ import (
 	"time"
 )
 
+// CheckType describes a type for a check
 type CheckType int
 
 const (
-	TCPCheck CheckType = iota
-	HTTPCheck
-	HTTPSCheck
+	// CheckTypeTCP is TCP type of check
+	CheckTypeTCP CheckType = iota
+	// CheckTypeHTTP is HTTP type of check
+	CheckTypeHTTP
+	// CheckTypeHTTP is HTTPS type of check
+	CheckTypeHTTPS
 )
 
 // --------------------------------------------
@@ -23,27 +27,28 @@ type AWSRegion struct {
 	Service   string
 	Latencies []time.Duration
 	Error     error
-	Type      CheckType
+	CheckType CheckType
 
 	Target  Targetter
 	Request Requester
 }
 
+// NewRegion creates a new region with a name and code
 func NewRegion(name, code string) AWSRegion {
 	return AWSRegion{
-		Name:    name,
-		Code:    code,
-		Type:    TCPCheck,
-		Request: &AWSRequest{},
+		Name:      name,
+		Code:      code,
+		CheckType: CheckTypeTCP,
+		Request:   &AWSRequest{},
 	}
 }
 
-// CheckLatency
+// CheckLatency does a latency check for a region
 func (r *AWSRegion) CheckLatency(wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	if r.Type == HTTPCheck || r.Type == HTTPSCheck {
-		r.checkLatencyHTTP(r.Type == HTTPSCheck)
+	if r.CheckType == CheckTypeHTTP || r.CheckType == CheckTypeHTTPS {
+		r.checkLatencyHTTP(r.CheckType == CheckTypeHTTPS)
 	} else {
 		r.checkLatencyTCP()
 	}
@@ -98,14 +103,17 @@ func (r *AWSRegion) GetLatencyStr() string {
 // AWSRegions slice of the AWSRegion
 type AWSRegions []AWSRegion
 
+// Len returns a count of regions
 func (rs AWSRegions) Len() int {
 	return len(rs)
 }
 
+// Less return result of latency comapre between two regions
 func (rs AWSRegions) Less(i, j int) bool {
 	return rs[i].GetLatency() < rs[j].GetLatency()
 }
 
+// Swap two regions by index
 func (rs AWSRegions) Swap(i, j int) {
 	rs[i], rs[j] = rs[j], rs[i]
 }
@@ -120,7 +128,7 @@ func (rs AWSRegions) SetService(service string) {
 // SetCheckType sets Check Type for all regions
 func (rs AWSRegions) SetCheckType(checkType CheckType) {
 	for i := range rs {
-		rs[i].Type = checkType
+		rs[i].CheckType = checkType
 	}
 }
 
@@ -128,7 +136,7 @@ func (rs AWSRegions) SetCheckType(checkType CheckType) {
 func (rs AWSRegions) SetDefaultTarget() {
 	rs.SetTarget(func(r *AWSRegion) {
 		r.Target = &AWSTarget{
-			HTTPS:   r.Type == HTTPSCheck,
+			HTTPS:   r.CheckType == CheckTypeHTTPS,
 			Code:    r.Code,
 			Service: r.Service,
 			Rnd:     mkRandomString(13),
@@ -136,7 +144,7 @@ func (rs AWSRegions) SetDefaultTarget() {
 	})
 }
 
-// SetDefaultTarget sets default target instance for all regions
+// SetTarget sets default target instance for all regions
 func (rs AWSRegions) SetTarget(fn func(r *AWSRegion)) {
 	for i := range rs {
 		fn(&rs[i])
