@@ -5,9 +5,19 @@ BUILD_OS="windows darwin freebsd linux"
 BUILD_ARCH="amd64 386"
 BUILD_DIR=build
 SRC_CMD=cmd/awsping/main.go
+VERSION=`grep "Version" utils.go | grep -o -E '[0-9]\.[0-9]\.[0-9]{1,2}'`
 
 build:
 	go build -race -o ${EXEC} ${SRC_CMD}
+
+clean:
+	@rm -f ${EXEC}
+	@rm -f ${BUILD_DIR}/*
+	@go clean
+
+#
+# Tests, linters
+#
 
 lint:
 	goling
@@ -19,14 +29,24 @@ run: lint
 test:
 	@go test -cover .
 
-release: buildall
-	git tag `grep "Version" utils.go | grep -o -E '[0-9]\.[0-9]\.[0-9]{1,2}'`
-	git push --tags origin master
+#
+# Release
+#
+check-version:
+ifdef VERSION
+	@echo Current version: $(VERSION)
+else
+	$(error VERSION is not set)
+endif
 
-clean:
-	@rm -f ${EXEC}
-	@rm -f ${BUILD_DIR}/*
-	@go clean
+check-master:
+ifneq ($(shell git rev-parse --abbrev-ref HEAD),master)
+	$(error You're not on the "master" branch)
+endif
+
+release: check-master check-version
+	git tag v${VERSION} && \
+	git push origin v${VERSION}
 
 buildall: clean
 	@mkdir -p ${BUILD_DIR}
@@ -39,6 +59,10 @@ buildall: clean
 			cd - ; \
 		done done
 	@rm ${BUILD_DIR}/${EXEC}
+
+#
+# Docker
+#
 
 docker:
 	docker build -t awsping .
