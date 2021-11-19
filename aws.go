@@ -108,7 +108,7 @@ func (rs AWSRegions) Len() int {
 	return len(rs)
 }
 
-// Less return result of latency comapre between two regions
+// Less return a result of latency compare between two regions
 func (rs AWSRegions) Less(i, j int) bool {
 	return rs[i].GetLatency() < rs[j].GetLatency()
 }
