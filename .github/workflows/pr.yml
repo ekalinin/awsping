@@ -1,0 +1,35 @@
+name: PR checks
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    name: Build, Test, Coverage
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Lint
+      uses: golangci/golangci-lint-action@v2
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v ./...
+ 
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        language: 'go'
+
+    - name: CodeQL Analysis
+      uses: github/codeql-action/analyze@v1
