@@ -1,6 +1,18 @@
 name: pr/push checks
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - 'Makefile'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - 'Makefile'
 
 jobs:
 
@@ -21,16 +33,16 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Test & coverage
+    - name: Test & Coverage
       run: go test -v -coverprofile=coverage.out -covermode=atomic
- 
+
     - name: Upload coverage to Codecov
       run: bash <(curl -s https://codecov.io/bash)
-      
+
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
       with:
-        language: 'go'
+        languages: 'go'
 
     - name: CodeQL Analysis
       uses: github/codeql-action/analyze@v1
