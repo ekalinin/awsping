@@ -1,6 +1,8 @@
 # awsping
 Console tool to check the latency to each AWS region
 
+[![codecov](https://codecov.io/gh/ekalinin/awsping/branch/master/graph/badge.svg)](https://codecov.io/gh/ekalinin/awsping)
+
 # ToC
 
 * [Usage](#usage)
