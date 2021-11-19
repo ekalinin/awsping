@@ -14,7 +14,7 @@ const (
 	CheckTypeTCP CheckType = iota
 	// CheckTypeHTTP is HTTP type of check
 	CheckTypeHTTP
-	// CheckTypeHTTP is HTTPS type of check
+	// CheckTypeHTTPS is HTTPS type of check
 	CheckTypeHTTPS
 )
 

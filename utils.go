@@ -13,12 +13,14 @@ import (
 )
 
 var (
+	// Version describes application version
 	Version   = "1.0.0"
 	github    = "https://github.com/ekalinin/awsping"
 	useragent = fmt.Sprintf("AwsPing/%s (+%s)", Version, github)
 )
 
 const (
+	// ShowOnlyRegions describes a type of output when only region's name and code printed out
 	ShowOnlyRegions = -1
 )
 
@@ -45,6 +47,7 @@ type LatencyOutput struct {
 	w       io.Writer
 }
 
+// NewOutput creates a new LatencyOutput instance
 func NewOutput(level, repeats int) *LatencyOutput {
 	return &LatencyOutput{
 		Level:   level,
