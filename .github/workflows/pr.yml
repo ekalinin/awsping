@@ -1,8 +1,6 @@
-name: PR checks
+name: pr/push checks
 
-on:
-  pull_request:
-    branches: [ master ]
+on: [push, pull_request]
 
 jobs:
 
