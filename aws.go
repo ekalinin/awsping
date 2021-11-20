@@ -39,7 +39,7 @@ func NewRegion(name, code string) AWSRegion {
 		Name:      name,
 		Code:      code,
 		CheckType: CheckTypeTCP,
-		Request:   &AWSRequest{},
+		Request:   NewAWSRequest(),
 	}
 }
 
