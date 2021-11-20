@@ -38,11 +38,3 @@ jobs:
 
     - name: Upload coverage to Codecov
       run: bash <(curl -s https://codecov.io/bash)
-
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
-      with:
-        languages: 'go'
-
-    - name: CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
