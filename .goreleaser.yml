@@ -1,23 +1,14 @@
+project_name: awsping
 builds:
 - env:
   - CGO_ENABLED=0
   main: ./cmd/awsping
-  # List of combinations of GOOS + GOARCH + GOARM to ignore.
-  # Default is empty.
-  ignore:
-    - goos: darwin
-      goarch: 386
-    - goos: linux
-      goarch: arm
-      goarm: 7
-    - goarm: mips64
-      gomips: hardfloat
-archives:
-- replacements:
-    darwin: Darwin
-    linux: Linux
-    windows: Windows
-    amd64: x86_64
+  goos:
+    - linux
+    - windows
+    - darwin
+  goarch:
+    - amd64
 checksum:
   name_template: 'checksums.txt'
 snapshot:
