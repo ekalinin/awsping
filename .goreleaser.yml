@@ -27,8 +27,8 @@ dockers:
   - image_templates:
     - "docker.io/evkalinin/{{.ProjectName}}:{{ .Tag }}"
     - "docker.io/evkalinin/{{.ProjectName}}:latest"
-    - "gcr.io/ekalinin/{{.ProjectName}}:{{ .Tag }}"
-    - "gcr.io/ekalinin/{{.ProjectName}}:latest"
+    - "ghcr.io/ekalinin/{{.ProjectName}}:{{ .Tag }}"
+    - "ghcr.io/ekalinin/{{.ProjectName}}:latest"
     dockerfile: Dockerfile.goreleaser
     build_flag_templates:
     - "--pull"
