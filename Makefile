@@ -20,13 +20,13 @@ clean:
 #
 
 lint:
-	goling
+	golint
 
 # make run ARGS="-h"
-run: lint
+run:
 	go run cmd/awsping/main.go $(ARGS)
 
-test:
+test: lint
 	@go test -cover .
 
 #
