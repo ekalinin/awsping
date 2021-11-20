@@ -48,6 +48,9 @@ release: check-master check-version
 	git tag v${VERSION} && \
 	git push origin v${VERSION}
 
+release-test: check-master check-version
+	goreleaser release --snapshot --rm-dist
+
 buildall: clean
 	@mkdir -p ${BUILD_DIR}
 	@for os in "${BUILD_OS}" ; do \
