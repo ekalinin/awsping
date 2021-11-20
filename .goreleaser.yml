@@ -22,6 +22,7 @@ changelog:
     - '^Makefile:'
     - '^README:'
     - '^gitignore:'
+    - '^goreleaser:'
 dockers:
   - image_templates:
     - "docker.io/evkalinin/{{.ProjectName}}:{{ .Tag }}"
