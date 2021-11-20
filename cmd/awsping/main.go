@@ -28,15 +28,17 @@ func main() {
 		os.Exit(0)
 	}
 
+	regions := awsping.GetRegions()
+
 	if *listRegions {
-		regions := awsping.GetRegions()
 		lo := awsping.NewOutput(awsping.ShowOnlyRegions, 0)
 		lo.Show(&regions)
 		os.Exit(0)
 	}
 
 	rand.Seed(time.Now().UnixNano())
-	regions := awsping.CalcLatency(*repeats, *useHTTP, *useHTTPS, *service)
+
+	awsping.CalcLatency(regions, *repeats, *useHTTP, *useHTTPS, *service)
 	lo := awsping.NewOutput(*verbose, *repeats)
-	lo.Show(regions)
+	lo.Show(&regions)
 }

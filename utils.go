@@ -144,8 +144,7 @@ func GetRegions() AWSRegions {
 }
 
 // CalcLatency returns list of aws regions sorted by Latency
-func CalcLatency(repeats int, useHTTP bool, useHTTPS bool, service string) *AWSRegions {
-	regions := GetRegions()
+func CalcLatency(regions AWSRegions, repeats int, useHTTP bool, useHTTPS bool, service string) {
 	regions.SetService(service)
 	switch {
 	case useHTTP:
@@ -167,5 +166,4 @@ func CalcLatency(repeats int, useHTTP bool, useHTTPS bool, service string) *AWSR
 	}
 
 	sort.Sort(regions)
-	return &regions
 }

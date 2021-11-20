@@ -112,3 +112,40 @@ func TestOutputShow2(t *testing.T) {
 		t.Errorf("Show2 failed:\ngot=%q\nwant=%q", got, want)
 	}
 }
+
+func TestCalcLatency(t *testing.T) {
+
+	regions := GetRegions()[:3]
+	regions[0].Request = &testRequest{duration: 30 * time.Millisecond}
+	regions[1].Request = &testRequest{duration: 7 * time.Millisecond}
+	regions[2].Request = &testRequest{duration: 15 * time.Millisecond}
+
+	regionsStats := make(AWSRegions, regions.Len())
+
+	checkSort := func(origIndex, sortedIdx int) {
+		got := regionsStats[sortedIdx].Name
+		want := regions[origIndex].Name
+
+		if got != want {
+			t.Errorf("CalcLatency failed:\ngot=%q\nwant=%q\norig=%d\nsorted=%d",
+				got, want, origIndex, sortedIdx)
+		}
+	}
+
+	for i := 1; i < 4; i++ {
+		copy(regionsStats, regions)
+
+		switch i {
+		case 1:
+			CalcLatency(regionsStats, 1, false, false, "ec2")
+		case 2:
+			CalcLatency(regionsStats, 1, true, false, "ec2")
+		default:
+			CalcLatency(regionsStats, 1, true, true, "ec2")
+		}
+
+		checkSort(0, 2)
+		checkSort(1, 0)
+		checkSort(2, 1)
+	}
+}
