@@ -14,7 +14,7 @@ import (
 
 var (
 	// Version describes application version
-	Version   = "2.0.0"
+	Version   = "2.0.1"
 	github    = "https://github.com/ekalinin/awsping"
 	useragent = fmt.Sprintf("AwsPing/%s (+%s)", Version, github)
 )
