@@ -3,6 +3,9 @@ Console tool to check the latency to each AWS region
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/ekalinin/awsping)](https://goreportcard.com/report/github.com/ekalinin/awsping)
 [![codecov](https://codecov.io/gh/ekalinin/awsping/branch/master/graph/badge.svg)](https://codecov.io/gh/ekalinin/awsping)
+[![Go Reference](https://pkg.go.dev/badge/github.com/ekalinin/awsping.svg)](https://pkg.go.dev/github.com/ekalinin/awsping)
+[![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/ekalinin/awsping)
 
 # ToC
 
