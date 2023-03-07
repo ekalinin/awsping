@@ -31,7 +31,7 @@ func Duration2ms(d time.Duration) float64 {
 	return float64(d.Nanoseconds()) / 1000 / 1000
 }
 
-// mkRandomString returns rundom string
+// mkRandomString returns random string
 func mkRandomString(n int) string {
 	b := make([]rune, n)
 	for i := range b {
@@ -58,7 +58,7 @@ func NewOutput(level, repeats int) *LatencyOutput {
 
 func (lo *LatencyOutput) show(regions *AWSRegions) {
 	for _, r := range *regions {
-		fmt.Fprintf(lo.w, "%-15s %-20s\n", r.Code, r.Name)
+		fmt.Fprintf(lo.w, "%-15s %-s\n", r.Code, r.Name)
 	}
 }
 
