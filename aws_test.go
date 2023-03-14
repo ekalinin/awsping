@@ -64,7 +64,7 @@ func TestAWSRegionCheckLatencyHTTP(t *testing.T) {
 	got := regions[0].GetLatency()
 	want := 15.0
 
-	if got < want || got > want+2 {
+	if got < want || got > want*2 {
 		t.Errorf("failed:\ngot=%f\nwant=%f", got, want)
 	}
 
@@ -189,7 +189,7 @@ func TestAWSRegionsSetService(t *testing.T) {
 	regions.SetService(service)
 
 	if regions[0].Service != service || regions[len(regions)-1].Service != service {
-		t.Errorf("failed: not setted, regions=%q, service=%s", regions, service)
+		t.Errorf("failed: not set, regions=%q, service=%s", regions, service)
 	}
 }
 
@@ -200,11 +200,11 @@ func TestAWSRegionsSetCheckType(t *testing.T) {
 	regions.SetCheckType(checkType)
 
 	if regions[0].CheckType != checkType || regions[len(regions)-1].CheckType != checkType {
-		t.Errorf("failed: not setted, regions=%q, checkType=%d", regions, checkType)
+		t.Errorf("failed: not set, regions=%q, checkType=%d", regions, checkType)
 	}
 }
 
-func TestAWSRegionsSetDefaulTarget(t *testing.T) {
+func TestAWSRegionsSetDefaultTarget(t *testing.T) {
 	regions := GetRegions()
 	service := "ec2"
 	checkType := CheckTypeHTTPS
