@@ -146,6 +146,7 @@ func GetRegions() AWSRegions {
 		NewRegion("US East (Ohio)", "us-east-2"),
 		NewRegion("US West (N. California)", "us-west-1"),
 		NewRegion("US West (Oregon)", "us-west-2"),
+		NewRegion("Israel (Tel Aviv)", "il-central-1"),
 	}
 }
 
