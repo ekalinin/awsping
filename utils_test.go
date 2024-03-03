@@ -44,10 +44,11 @@ func TestOutputShowOnlyRegions(t *testing.T) {
 	lo.Show(&regions)
 
 	got := b.String()
-	want := "us-east-1       US-East (N. Virginia)\n" +
-		"us-east-2       US-East (Ohio)      \n"
+	want := "af-south-1      Africa (Cape Town)\n" +
+		"ap-east-1       Asia Pacific (Hong Kong)\n"
+
 	if got != want {
-		t.Errorf("Show: got=%q\nwant=%q", got, want)
+		t.Errorf("Show:\ngot =%q\nwant=%q", got, want)
 	}
 }
 
@@ -63,11 +64,11 @@ func TestOutputShow0(t *testing.T) {
 
 	lo.Show(&regions)
 
-	want := "US-East (N. Virginia)                 15.00 ms\n" +
-		"US-East (Ohio)                        25.00 ms\n"
+	want := "Africa (Cape Town)                    15.00 ms\n" +
+		"Asia Pacific (Hong Kong)              25.00 ms\n"
 	got := b.String()
 	if got != want {
-		t.Errorf("Show0 failed:\ngot=%q\nwant=%q", got, want)
+		t.Errorf("Show0 failed:\ngot =%q\nwant=%q", got, want)
 	}
 }
 
@@ -85,10 +86,10 @@ func TestOutputShow1(t *testing.T) {
 
 	got := b.String()
 	want := "      Code            Region                                      Latency\n" +
-		"    0 us-east-1       US-East (N. Virginia)                      15.00 ms\n" +
-		"    1 us-east-2       US-East (Ohio)                             25.00 ms\n"
+		"    0 af-south-1      Africa (Cape Town)                         15.00 ms\n" +
+		"    1 ap-east-1       Asia Pacific (Hong Kong)                   25.00 ms\n"
 	if got != want {
-		t.Errorf("Show1 failed:\ngot=%q\nwant=%q", got, want)
+		t.Errorf("Show1 failed:\ngot =%q\nwant=%q", got, want)
 	}
 }
 
@@ -106,10 +107,10 @@ func TestOutputShow2(t *testing.T) {
 
 	got := b.String()
 	want := "      Code            Region                             Try #1          Try #2     Avg Latency\n" +
-		"    0 us-east-1       US-East (N. Virginia)            15.00 ms        17.00 ms        16.00 ms\n" +
-		"    1 us-east-2       US-East (Ohio)                   25.00 ms        26.00 ms        25.50 ms\n"
+		"    0 af-south-1      Africa (Cape Town)               15.00 ms        17.00 ms        16.00 ms\n" +
+		"    1 ap-east-1       Asia Pacific (Hong Kong)         25.00 ms        26.00 ms        25.50 ms\n"
 	if got != want {
-		t.Errorf("Show2 failed:\ngot=%q\nwant=%q", got, want)
+		t.Errorf("Show2 failed:\ngot =%q\nwant=%q", got, want)
 	}
 }
 
