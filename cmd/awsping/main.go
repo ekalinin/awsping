@@ -18,6 +18,7 @@ var (
 	verbose     = flag.Int("verbose", 0, "Verbosity level (0: name-latency); 1: code-name-latency; 2: code-name-tries-avg")
 	service     = flag.String("service", "dynamodb", "AWS Service: ec2, sdb, sns, sqs, ...")
 	listRegions = flag.Bool("list-regions", false, "Show list of regions")
+	usOnly      = flag.Bool("us", false, "Only US regions")
 )
 
 func main() {
@@ -29,6 +30,9 @@ func main() {
 	}
 
 	regions := awsping.GetRegions()
+	if *usOnly {
+		regions = awsping.GetRegionsUS()
+	}
 
 	if *listRegions {
 		lo := awsping.NewOutput(awsping.ShowOnlyRegions, 0)

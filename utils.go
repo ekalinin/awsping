@@ -116,8 +116,24 @@ func (lo *LatencyOutput) Show(regions *AWSRegions) {
 	}
 }
 
-// GetRegions returns a list of regions
+// GetRegions returns a list of all regions
 func GetRegions() AWSRegions {
+	us := GetRegionsUS()
+	other := GetNonUSRegions()
+
+	return append(us, other...)
+}
+
+func GetRegionsUS() AWSRegions {
+	return AWSRegions{
+    NewRegion("US East (N. Virginia)", "us-east-1"),
+		NewRegion("US East (Ohio)", "us-east-2"),
+		NewRegion("US West (N. California)", "us-west-1"),
+		NewRegion("US West (Oregon)", "us-west-2"),
+	}
+}
+
+func GetNonUSRegions() AWSRegions {
 	return AWSRegions{
 		NewRegion("Africa (Cape Town)", "af-south-1"),
 		NewRegion("Asia Pacific (Hong Kong)", "ap-east-1"),
@@ -142,10 +158,6 @@ func GetRegions() AWSRegions {
 		NewRegion("Middle East (UAE)", "me-central-1"),
 		NewRegion("Middle East (Bahrain)", "me-south-1"),
 		NewRegion("South America (Sao Paulo)", "sa-east-1"),
-		NewRegion("US East (N. Virginia)", "us-east-1"),
-		NewRegion("US East (Ohio)", "us-east-2"),
-		NewRegion("US West (N. California)", "us-west-1"),
-		NewRegion("US West (Oregon)", "us-west-2"),
 		NewRegion("Israel (Tel Aviv)", "il-central-1"),
 	}
 }
