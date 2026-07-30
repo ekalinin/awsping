@@ -35,6 +35,30 @@ func TestRandomString(t *testing.T) {
 	}
 }
 
+func TestGetRegionsIncludesLatestRegions(t *testing.T) {
+	want := map[string]string{
+		"ap-east-2":    "Asia Pacific (Taipei)",
+		"ca-west-1":    "Canada West (Calgary)",
+		"mx-central-1": "Mexico (Central)",
+		"sa-east-1":    "South America (São Paulo)",
+	}
+
+	for _, region := range GetRegions() {
+		name, ok := want[region.Code]
+		if !ok {
+			continue
+		}
+		if region.Name != name {
+			t.Errorf("region %s: got name %q, want %q", region.Code, region.Name, name)
+		}
+		delete(want, region.Code)
+	}
+
+	for code := range want {
+		t.Errorf("missing region %s", code)
+	}
+}
+
 func TestOutputShowOnlyRegions(t *testing.T) {
 	var b bytes.Buffer
 
@@ -225,7 +249,7 @@ func TestCalcLatencySortsFailedRegionsLast(t *testing.T) {
 	if got, want := regions[1].Name, "Africa (Cape Town)"; got != want {
 		t.Errorf("second region: got %q, want %q", got, want)
 	}
-	if got, want := regions[2].Name, "Asia Pacific (Tokyo)"; got != want {
+	if got, want := regions[2].Name, "Asia Pacific (Taipei)"; got != want {
 		t.Errorf("third region: got %q, want %q", got, want)
 	}
 }
