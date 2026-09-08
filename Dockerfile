@@ -1,9 +1,18 @@
-FROM golang:1.17-bullseye as build
-COPY . /build
-WORKDIR /build
-RUN make
+FROM golang:1.26.5-trixie AS build
 
-FROM gcr.io/distroless/base
-COPY --from=build /build/awsping /
+WORKDIR /src
+COPY go.mod ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -trimpath \
+    -ldflags="-s -w" \
+    -o /out/awsping \
+    ./cmd/awsping
 
+FROM gcr.io/distroless/static-debian13:nonroot
+
+COPY --from=build --chown=nonroot:nonroot /out/awsping /awsping
+
+USER nonroot:nonroot
 ENTRYPOINT ["/awsping"]

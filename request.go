@@ -60,7 +60,9 @@ func (r *AWSRequest) DoHTTP(ua, url string) (time.Duration, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	return latency, nil
 }
@@ -73,7 +75,9 @@ func (r *AWSRequest) DoTCP(_, addr string) (time.Duration, error) {
 		return 0, err
 	}
 	l := time.Since(start)
-	defer conn.Close()
+	defer func() {
+		_ = conn.Close()
+	}()
 
 	return l, nil
 }

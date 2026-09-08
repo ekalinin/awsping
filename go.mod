@@ -1,3 +1,3 @@
 module github.com/ekalinin/awsping
 
-go 1.17
+go 1.26.0

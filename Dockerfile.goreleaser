@@ -1,4 +1,6 @@
-FROM gcr.io/distroless/base
-COPY awsping /
+FROM gcr.io/distroless/static-debian13:nonroot
 
+COPY --chown=nonroot:nonroot awsping /awsping
+
+USER nonroot:nonroot
 ENTRYPOINT ["/awsping"]

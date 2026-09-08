@@ -3,9 +3,11 @@ EXEC=${NAME}
 BUILD_DIR=build
 BUILD_OS="windows darwin freebsd linux"
 BUILD_ARCH="amd64 386"
-BUILD_DIR=build
 SRC_CMD=cmd/awsping/main.go
 VERSION=`grep "Version" utils.go | grep -o -E '[0-9]\.[0-9]\.[0-9]{1,2}'`
+GOLANGCI_LINT?=golangci-lint
+
+.PHONY: build clean lint run test check check-version check-master release release-test buildall docker docker-run
 
 build:
 	go build -race -o ${EXEC} ${SRC_CMD}
@@ -20,14 +22,19 @@ clean:
 #
 
 lint:
-	golint
+	$(GOLANGCI_LINT) run ./...
 
 # make run ARGS="-h"
 run:
 	go run cmd/awsping/main.go $(ARGS)
 
-test: lint
-	@go test -cover .
+test:
+	go test -cover ./...
+
+check: lint
+	go test -race ./...
+	go vet ./...
+	go build -v ./...
 
 #
 # Release

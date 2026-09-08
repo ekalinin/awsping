@@ -18,14 +18,23 @@ const (
 	CheckTypeHTTPS
 )
 
+// AttemptResult describes the outcome of a single latency check.
+type AttemptResult struct {
+	Latency time.Duration
+	Err     error
+}
+
 // --------------------------------------------
 
 // AWSRegion description of the AWS EC2 region
 type AWSRegion struct {
-	Name      string
-	Code      string
-	Service   string
+	Name     string
+	Code     string
+	Service  string
+	Attempts []AttemptResult
+	// Latencies is kept for backward compatibility. New code should use Attempts.
 	Latencies []time.Duration
+	// Error is kept for backward compatibility. New code should use LastError.
 	Error     error
 	CheckType CheckType
 
@@ -58,44 +67,125 @@ func (r *AWSRegion) CheckLatency(wg *sync.WaitGroup) {
 func (r *AWSRegion) checkLatencyHTTP(https bool) {
 	url := r.Target.GetURL()
 	l, err := r.Request.Do(useragent, url, RequestTypeHTTP)
-	if err != nil {
-		r.Error = err
-		return
-	}
-	r.Latencies = append(r.Latencies, l)
+	r.recordAttempt(l, err)
 }
 
 // checkLatencyTCP Test Latency via TCP
 func (r *AWSRegion) checkLatencyTCP() {
 	tcpAddr, err := r.Target.GetIP()
 	if err != nil {
-		r.Error = err
+		r.recordAttempt(0, err)
 		return
 	}
 
 	l, err := r.Request.Do(useragent, tcpAddr.String(), RequestTypeTCP)
+	r.recordAttempt(l, err)
+}
+
+func (r *AWSRegion) recordAttempt(latency time.Duration, err error) {
+	r.Attempts = append(r.Attempts, AttemptResult{
+		Latency: latency,
+		Err:     err,
+	})
+
 	if err != nil {
 		r.Error = err
 		return
 	}
-	r.Latencies = append(r.Latencies, l)
+
+	r.Latencies = append(r.Latencies, latency)
+}
+
+// SuccessfulAttempts returns the number of checks completed without an error.
+func (r *AWSRegion) SuccessfulAttempts() int {
+	if len(r.Attempts) == 0 {
+		return len(r.Latencies)
+	}
+
+	successful := 0
+	for _, attempt := range r.Attempts {
+		if attempt.Err == nil {
+			successful++
+		}
+	}
+	return successful
+}
+
+// FailedAttempts returns the number of checks completed with an error.
+func (r *AWSRegion) FailedAttempts() int {
+	if len(r.Attempts) == 0 {
+		if r.Error != nil {
+			return 1
+		}
+		return 0
+	}
+
+	failed := 0
+	for _, attempt := range r.Attempts {
+		if attempt.Err != nil {
+			failed++
+		}
+	}
+	return failed
+}
+
+// AverageLatency returns the average latency of successful attempts.
+func (r *AWSRegion) AverageLatency() (time.Duration, bool) {
+	if len(r.Attempts) == 0 {
+		if len(r.Latencies) == 0 {
+			return 0, false
+		}
+
+		var total time.Duration
+		for _, latency := range r.Latencies {
+			total += latency
+		}
+		return total / time.Duration(len(r.Latencies)), true
+	}
+
+	var total time.Duration
+	successful := 0
+	for _, attempt := range r.Attempts {
+		if attempt.Err != nil {
+			continue
+		}
+		total += attempt.Latency
+		successful++
+	}
+	if successful == 0 {
+		return 0, false
+	}
+	return total / time.Duration(successful), true
+}
+
+// LastError returns the error from the most recent failed attempt.
+func (r *AWSRegion) LastError() error {
+	for i := len(r.Attempts) - 1; i >= 0; i-- {
+		if r.Attempts[i].Err != nil {
+			return r.Attempts[i].Err
+		}
+	}
+	return r.Error
 }
 
 // GetLatency returns Latency in ms
 func (r *AWSRegion) GetLatency() float64 {
-	sum := float64(0)
-	for _, l := range r.Latencies {
-		sum += Duration2ms(l)
+	latency, ok := r.AverageLatency()
+	if !ok {
+		return 0
 	}
-	return sum / float64(len(r.Latencies))
+	return Duration2ms(latency)
 }
 
 // GetLatencyStr returns Latency in string
 func (r *AWSRegion) GetLatencyStr() string {
-	if r.Error != nil {
-		return r.Error.Error()
+	if latency, ok := r.AverageLatency(); ok {
+		return fmt.Sprintf("%.2f ms", Duration2ms(latency))
 	}
-	return fmt.Sprintf("%.2f ms", r.GetLatency())
+	if err := r.LastError(); err != nil {
+		return err.Error()
+	}
+	return "-"
 }
 
 // --------------------------------------------
@@ -110,7 +200,16 @@ func (rs AWSRegions) Len() int {
 
 // Less return a result of latency compare between two regions
 func (rs AWSRegions) Less(i, j int) bool {
-	return rs[i].GetLatency() < rs[j].GetLatency()
+	left, leftOK := rs[i].AverageLatency()
+	right, rightOK := rs[j].AverageLatency()
+
+	if leftOK != rightOK {
+		return leftOK
+	}
+	if !leftOK {
+		return false
+	}
+	return left < right
 }
 
 // Swap two regions by index
